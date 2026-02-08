@@ -13,14 +13,19 @@
             --bg-color: #dcdcdc;
             --board-bg: #cda676;
             --grid-line: #463325;
-            /* Country Colors */
-            --shu-color: #2ecc71; /* Green */
-            --wu-color: #e74c3c;  /* Red */
-            --wei-color: #3498db; /* Blue */
+            /* Country Colors - Defined for Glow Effects */
+            --shu-color: #2ecc71; 
+            --wu-color: #e74c3c;  
+            --wei-color: #3498db; 
+            
+            /* Font Variables */
+            --font-art: 'Ma Shan Zheng', cursive;
+            --font-text: "BiauKai", "KaiTi", "標楷體", "Microsoft JhengHei", serif;
+            --font-eng: "Arial", sans-serif;
         }
 
         body {
-            font-family: "BiauKai", "KaiTi", "標楷體", "Microsoft JhengHei", serif;
+            font-family: var(--font-text);
             margin: 0; padding: 0;
             display: flex; flex-direction: column; align-items: center;
             height: 100vh; width: 100vw; overflow: hidden;
@@ -28,26 +33,26 @@
             transition: background 1s ease-in-out; 
         }
 
-        /* Utility Class */
         .hidden { display: none !important; }
 
         /* =========================================
-           THEME 1: WAR (Intro & Menu)
+           SCENE: INTRO SCREEN
            ========================================= */
-        body.theme-war {
-            background-color: #1a0505;
-            background-image: 
-                radial-gradient(circle at 50% 30%, #4a0e0e 0%, #1a0505 80%),
-                url("data:image/svg+xml,%3Csvg width='800' height='600' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.1'/%3E%3C/svg%3E");
-            color: #fff;
-        }
-
         #intro-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             z-index: 9000;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
+            cursor: pointer;
+            transition: background 1s, opacity 1s;
         }
 
+        .tap-hint {
+            position: absolute; bottom: 20px; font-size: 0.9rem; opacity: 0.5; color: #fff;
+            animation: pulse 2s infinite; font-family: var(--font-text);
+        }
+        @keyframes pulse { 0% { opacity: 0.3; } 50% { opacity: 0.8; } 100% { opacity: 0.3; } }
+
+        /* Battlefield Silhouettes */
         .battlefield-bg {
             position: absolute; bottom: 0; left: 0; width: 100%; height: 40%;
             background-repeat: repeat-x; background-position: bottom; background-size: auto 100%;
@@ -55,32 +60,36 @@
             opacity: 0.8; pointer-events: none;
         }
 
+        /* Embers */
         .ember {
-            position: absolute; bottom: -10px; width: 4px; height: 4px; background: #ff4500; border-radius: 50%;
+            position: absolute; bottom: -10px; width: 4px; height: 4px; border-radius: 50%;
+            background: #ff4500;
             box-shadow: 0 0 10px #ff4500, 0 0 20px #ffff00;
             animation: rise 4s linear infinite; pointer-events: none;
         }
         @keyframes rise { 0% {bottom: -10px; opacity: 1;} 100% {bottom: 100%; opacity: 0; transform: translateX(50px);} }
 
+        /* Intro Text */
         .intro-text-container { position: relative; z-index: 10; text-align: center; padding: 20px; animation: fadeIn 2s ease-out; }
         @keyframes fadeIn { from {opacity: 0; transform: scale(0.9);} to {opacity: 1; transform: scale(1);} }
 
-        .intro-sub { font-family: 'Ma Shan Zheng', cursive; font-size: 2.5rem; color: #d4af37; text-shadow: 2px 2px 4px #000; margin-bottom: 10px; letter-spacing: 5px; }
+        .intro-sub { font-family: var(--font-art); font-size: 2.5rem; color: #d4af37; text-shadow: 2px 2px 4px #000; margin-bottom: 10px; letter-spacing: 5px; }
         .intro-main {
-            font-family: 'Ma Shan Zheng', cursive; font-size: 5rem;
-            background: linear-gradient(to bottom, #ff0000 30%, #800000 100%);
+            font-family: var(--font-art); font-size: 5rem;
+            background-image: linear-gradient(to bottom, #ff0000 30%, #800000 100%);
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            text-shadow: 0px 0px 20px rgba(255, 0, 0, 0.5); margin: 0; line-height: 1.2; letter-spacing: 10px; position: relative;
+            text-shadow: 0px 0px 20px rgba(255, 0, 0, 0.5);
+            margin: 0; line-height: 1.2; letter-spacing: 10px; position: relative;
         }
         .intro-main::after {
             content: attr(data-text); position: absolute; left: 0; top: 0; width: 100%; height: 100%;
-            background: linear-gradient(to bottom, transparent 40%, #500 90%);
+            background-image: linear-gradient(to bottom, transparent 40%, #500 90%);
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
             opacity: 0.5; filter: blur(1px); z-index: -1;
         }
 
         .start-btn {
-            margin-top: 50px; font-family: 'Ma Shan Zheng', cursive; font-size: 2.5rem;
+            margin-top: 50px; font-family: var(--font-art); font-size: 2.5rem;
             padding: 15px 60px; background: transparent; color: #d4af37;
             border: 3px solid #d4af37; border-radius: 5px; cursor: pointer;
             text-shadow: 0 0 10px #d4af37; box-shadow: 0 0 20px rgba(212, 175, 55, 0.2), inset 0 0 20px rgba(0,0,0,0.5);
@@ -95,16 +104,29 @@
         @keyframes shine { 0% {transform: rotate(45deg) translateY(-100%);} 100% {transform: rotate(45deg) translateY(100%);} }
 
         .ost-btn {
-            margin-top: 20px; font-family: 'BiauKai', serif; font-size: 1.2rem;
-            padding: 8px 30px; background: transparent; color: #888;
+            margin-top: 20px; font-family: var(--font-text); font-size: 1.2rem;
+            padding: 8px 30px; background: transparent; color: #aaa;
             border: 1px solid #555; border-radius: 30px; cursor: pointer;
             transition: all 0.3s; z-index: 10; letter-spacing: 2px;
         }
         .ost-btn:hover { color: #d4af37; border-color: #d4af37; background: rgba(212, 175, 55, 0.1); }
+        .ost-eng { font-family: var(--font-eng); font-weight: bold; }
+
 
         /* =========================================
-           THEME 2: PEACE (Game Board)
+           THEME MODES
            ========================================= */
+        
+        /* 1. WAR (Pure Dark) */
+        body.theme-war {
+            background-color: #1a0505;
+            background-image: 
+                radial-gradient(circle at 50% 30%, #4a0e0e 0%, #1a0505 80%),
+                url("data:image/svg+xml,%3Csvg width='800' height='600' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.1'/%3E%3C/svg%3E");
+            color: #fff;
+        }
+
+        /* 2. PEACE (Game & Return) - Light BG with Fish */
         body.theme-peace {
             background-color: #f0f0f0;
             background-image: 
@@ -113,6 +135,11 @@
             background-size: cover;
             background-position: center bottom;
             color: #333;
+        }
+
+        /* --- THE MAGIC TRICK: Mix War UI with Peace BG on Return --- */
+        body.theme-peace #intro-screen {
+            background-color: rgba(20, 5, 5, 0.6); 
         }
 
         /* --- Koi Fish Layers --- */
@@ -127,29 +154,16 @@
         .koi-unit { position: absolute; pointer-events: none; }
 
         /* Internal Fish Animations */
-        .koi-body-group { 
-            animation: fish-swim 1s ease-in-out infinite alternate;
-            transform-origin: 100px 50px; 
-        }
-        .koi-tail { 
-            transform-origin: 30px 50px; 
-            animation: tail-wag 0.8s ease-in-out infinite alternate; 
-        }
-        .koi-fin-l { 
-            transform-origin: 120px 30px; 
-            animation: fin-wave-l 1.2s ease-in-out infinite alternate; 
-        }
-        .koi-fin-r { 
-            transform-origin: 120px 70px; 
-            animation: fin-wave-r 1.2s ease-in-out infinite alternate; 
-        }
-
+        .koi-body-group { animation: fish-swim 1s ease-in-out infinite alternate; transform-origin: 100px 50px; }
+        .koi-tail { transform-origin: 30px 50px; animation: tail-wag 0.8s ease-in-out infinite alternate; }
+        .koi-fin-l { transform-origin: 120px 30px; animation: fin-wave-l 1.2s ease-in-out infinite alternate; }
+        .koi-fin-r { transform-origin: 120px 70px; animation: fin-wave-r 1.2s ease-in-out infinite alternate; }
         @keyframes tail-wag { 0% { transform: rotate(15deg); } 100% { transform: rotate(-15deg); } }
         @keyframes fish-swim { 0% { transform: translateY(-1px) rotate(0.5deg); } 100% { transform: translateY(1px) rotate(-0.5deg); } }
         @keyframes fin-wave-l { 0% { transform: rotate(0deg); } 100% { transform: rotate(30deg); } }
         @keyframes fin-wave-r { 0% { transform: rotate(0deg); } 100% { transform: rotate(-30deg); } }
 
-        /* --- Header (Game) --- */
+        /* --- Header & Game UI --- */
         #game-header {
             width: 95%; max-width: 800px; padding: 10px 15px; margin-top: 10px;
             background: linear-gradient(to right, rgba(20,20,20,0.9), rgba(40,40,40,0.9));
@@ -165,7 +179,7 @@
             background: #8b4513; color: white; border: 1px solid #a0522d;
             padding: 5px 12px; font-size: 1rem; border-radius: 4px; cursor: pointer;
             box-shadow: 0 2px 5px rgba(0,0,0,0.5); margin-left: 10px;
-            font-family: 'BiauKai'; font-weight: bold;
+            font-family: var(--font-text); font-weight: bold;
         }
         .header-btn:hover { background: #a0522d; }
 
@@ -191,7 +205,6 @@
             position: absolute; top: -8px; right: -8px; background: #c0392b; color: white; border: 2px solid #fff; border-radius: 50%; width: 24px; height: 24px; font-size: 0.9rem; font-weight:bold; display: flex; justify-content: center; align-items: center; box-shadow: 2px 2px 5px rgba(0,0,0,0.5); display: none; 
         }
 
-        /* --- Board --- */
         #board-container {
             flex: 1; display: flex; justify-content: center; align-items: center;
             width: 100%; padding: 10px; box-sizing: border-box;
@@ -220,7 +233,7 @@
             width: 82%; height: 82%; border-radius: 50%;
             display: flex; justify-content: center; align-items: center;
             position: relative; z-index: 2;
-            font-family: "BiauKai", "KaiTi", "標楷體", serif; font-size: 2.2rem; font-weight: 900;
+            font-family: var(--font-text); font-size: 2.2rem; font-weight: 900;
             background: radial-gradient(circle at 35% 35%, #fdf5e6, #e6d2b5 80%);
             box-shadow: inset 2px 2px 5px rgba(255,255,255,0.7), inset -2px -2px 5px rgba(0,0,0,0.3), 3px 5px 10px rgba(0,0,0,0.5);
             border: 1px solid #b0a080;
@@ -237,7 +250,7 @@
             color: #daa520; /* Bronze Gold */
             font-size: 2.2rem; 
             text-shadow: 1px 1px 2px #000, 0 0 5px rgba(212, 175, 55, 0.3);
-            font-family: "Zhi Mang Xing", "LiSu", "SimLi", "Ma Shan Zheng", cursive;
+            font-family: var(--font-art);
             font-weight: normal;
         }
         @media (max-width: 600px) { .piece.back::after { font-size: 1.6rem; } }
@@ -264,28 +277,49 @@
             box-shadow: 0 0 30px rgba(255, 69, 0, 0.3), inset 0 0 20px rgba(0,0,0,0.8);
             color: #d4af37; width: 85%; max-width: 400px; padding: 30px; border-radius: 8px; text-align: center;
         }
-        #mode-overlay h2, #ost-overlay h2 { font-family: 'Ma Shan Zheng'; color: #ff4500; text-shadow: 0 0 10px rgba(255, 69, 0, 0.5); font-size: 2.2rem; }
-        #mode-overlay label { color: #d4af37; }
-        #mode-overlay select { background: #333; color: #fff; border: 1px solid #555; }
+        #mode-overlay h2, #ost-overlay h2 { font-family: var(--font-art); color: #ff4500; text-shadow: 0 0 10px rgba(255, 69, 0, 0.5); font-size: 2.2rem; }
+        #mode-overlay label { color: #d4af37; font-family: var(--font-text); }
+        #mode-overlay select { background: #333; color: #fff; border: 1px solid #555; font-family: var(--font-text); }
         #mode-overlay .menu-btn, #ost-overlay .menu-btn {
             background: linear-gradient(to bottom, #800000, #500000);
             border: 1px solid #ff4500; color: #fff;
-            font-family: 'Ma Shan Zheng'; font-size: 1.5rem;
+            font-family: var(--font-text); font-size: 1.3rem; font-weight: bold;
             margin: 10px 0; width: 100%; padding: 10px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            letter-spacing: 1px;
         }
         #mode-overlay .menu-btn:hover, #ost-overlay .menu-btn:hover { background: linear-gradient(to bottom, #a00000, #700000); box-shadow: 0 0 15px rgba(255, 69, 0, 0.6); }
 
         .modal { background: #fff; padding: 30px; border-radius: 12px; text-align: center; width: 85%; max-width: 400px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); border: 4px solid #34495e; }
-        h3 { margin-top: 0; color: #2c3e50; font-family:'BiauKai'; font-size:1.8rem; }
+        h3 { margin-top: 0; color: #2c3e50; font-family: var(--font-text); font-size:1.8rem; }
         
         .faction-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 20px; }
         .faction-btn {
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            padding: 15px 5px; height: 100px; font-family: "BiauKai"; width: 100%;
-            background: #d35400; color: white; border: none; font-size: 1.1rem; cursor: pointer; border-radius: 6px;
+            padding: 15px 5px; height: 100px; font-family: var(--font-text); width: 100%;
+            background: #333; color: white; border: none; font-size: 1.1rem; cursor: pointer; border-radius: 6px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.4); border: 2px solid transparent; position: relative; overflow: hidden; transition: all 0.3s;
         }
-        .faction-btn h4 { font-size: 1.8rem; margin: 0; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); }
+        .faction-btn h4 { font-size: 1.8rem; margin: 0; text-shadow: 1px 1px 2px rgba(0,0,0,0.8); }
+
+        /* Specific Faction Styles & Neon Glow */
+        .btn-shu { background: linear-gradient(135deg, #145a32, #2ecc71); border-color: #117a65; }
+        .btn-wu { background: linear-gradient(135deg, #641e16, #e74c3c); border-color: #922b21; }
+        .btn-wei { background: linear-gradient(135deg, #154360, #3498db); border-color: #1f618d; }
+
+        .faction-btn:hover { transform: translateY(-3px); }
+        .btn-shu:hover { box-shadow: 0 0 20px var(--shu-color), 0 0 40px var(--shu-color), inset 0 0 20px rgba(255,255,255,0.3); border-color: #fff; }
+        .btn-wu:hover { box-shadow: 0 0 20px var(--wu-color), 0 0 40px var(--wu-color), inset 0 0 20px rgba(255,255,255,0.3); border-color: #fff; }
+        .btn-wei:hover { box-shadow: 0 0 20px var(--wei-color), 0 0 40px var(--wei-color), inset 0 0 20px rgba(255,255,255,0.3); border-color: #fff; }
+        
+        .secondary-btn {
+            background: linear-gradient(to bottom, #2c3e50, #000);
+            color: #d4af37; border: 1px solid #555;
+            font-family: var(--font-text); font-weight: bold; font-size: 1.1rem;
+            padding: 10px; width: 100%; margin-top: 15px; border-radius: 5px;
+            cursor: pointer; transition: all 0.3s;
+        }
+        .secondary-btn:hover { color: #fff; border-color: #d4af37; box-shadow: 0 0 10px rgba(212, 175, 55, 0.5); }
         
         #dice-container { display: flex; justify-content: space-around; margin: 20px 0; min-height: 60px; }
         .dice-wrapper { display: flex; flex-direction: column; align-items: center; }
@@ -300,21 +334,13 @@
         .diff-select { margin-bottom: 20px; text-align: left; padding: 10px; border: 1px solid #8b4513; border-radius: 5px; background: rgba(0,0,0,0.3); }
         .diff-select select { width: 100%; padding: 8px; margin-top: 5px; }
 
-        /* OST Track List */
-        #ost-list {
-            list-style: none; padding: 0; margin: 0;
-            max-height: 250px; overflow-y: auto;
-            text-align: left;
-            border: 1px solid #555; background: rgba(0,0,0,0.3);
-        }
-        #ost-list li {
-            padding: 10px; border-bottom: 1px solid #444;
-            cursor: pointer; transition: all 0.2s;
-            font-size: 1.1rem; font-family: "Microsoft JhengHei";
-        }
+        #ost-list { list-style: none; padding: 0; margin: 0; max-height: 250px; overflow-y: auto; text-align: left; border: 1px solid #555; background: rgba(0,0,0,0.3); }
+        #ost-list li { padding: 10px; border-bottom: 1px solid #444; cursor: pointer; transition: all 0.2s; font-size: 1.1rem; font-family: var(--font-text); }
         #ost-list li:hover { background: rgba(212, 175, 55, 0.2); color: #fff; }
         #ost-list li.playing { color: #ff4500; font-weight: bold; background: rgba(0,0,0,0.5); }
         #ost-list li .track-num { color: #888; font-size: 0.9rem; margin-right: 10px; }
+        
+        #ost-overlay .menu-btn { font-family: var(--font-text); }
 
         @media (max-width: 768px) {
             .intro-sub { font-size: 1.5rem; }
@@ -325,20 +351,28 @@
 </head>
 <body class="theme-war">
 
-    <!-- Audio Placeholders (Dynamic via JS) -->
+    <!-- Audio Placeholders -->
+    <audio id="bgm-war" src="" loop></audio> 
+    <audio id="bgm-peace" src="" loop></audio> 
+    <audio id="bgm-end" src=""></audio>
+    <audio id="ost-player"></audio>
+    <audio id="sfx-flip" src=""></audio>
+    <audio id="sfx-move" src=""></audio>
+    <audio id="sfx-capture" src=""></audio>
 
     <!-- 0. INTRO SCREEN -->
-    <div id="intro-screen">
+    <div id="intro-screen" onclick="SoundManager.tryAutoPlayBGM()">
         <div class="battlefield-bg"></div>
         <div class="intro-text-container">
             <div class="intro-sub">運籌帷幄。決勝千里</div>
             <h1 class="intro-main" data-text="三國の爭霸天下">三國の爭霸天下</h1>
         </div>
-        <button class="start-btn" onclick="enterGame()">自立為王</button>
-        <button class="ost-btn" onclick="openOST()">三國棋 OST</button>
+        <button class="start-btn" onclick="enterGame(event)">自立為王</button>
+        <button class="ost-btn" onclick="openOST(event)">三國棋 <span class="ost-eng">OST</span></button>
+        <div class="tap-hint">（點擊任意處開始）</div>
     </div>
 
-    <!-- KOI FISH LAYER (Dynamic SVG via JS) -->
+    <!-- KOI FISH LAYER -->
     <div id="fish-layer"></div>
 
     <!-- Header -->
@@ -388,6 +422,7 @@
                 <button class="menu-btn" onclick="startSetup(1)">單騎救主 (1人)</button>
                 <button class="menu-btn" onclick="startSetup(2)">赤壁之戰 (2人)</button>
                 <button class="menu-btn" onclick="startSetup(3)">三國鼎立 (3人)</button>
+                <button class="secondary-btn" onclick="backToIntro()">班師回朝</button>
             </div>
         </div>
     </div>
@@ -397,16 +432,17 @@
         <div class="modal">
             <h3 id="country-title">主公請選擇勢力</h3>
             <div class="faction-grid">
-                <button class="faction-btn" onclick="selectCountry('SHU')" style="background:var(--shu-color); border-color:#27ae60;">
+                <button class="faction-btn btn-shu" onclick="selectCountry('SHU')">
                     <h4>蜀</h4><span>劉備</span>
                 </button>
-                <button class="faction-btn" onclick="selectCountry('WU')" style="background:var(--wu-color); border-color:#c0392b;">
+                <button class="faction-btn btn-wu" onclick="selectCountry('WU')">
                     <h4>吳</h4><span>孫權</span>
                 </button>
-                <button class="faction-btn" onclick="selectCountry('WEI')" style="background:var(--wei-color); border-color:#2980b9;">
+                <button class="faction-btn btn-wei" onclick="selectCountry('WEI')">
                     <h4>魏</h4><span>曹操</span>
                 </button>
             </div>
+            <button class="secondary-btn" onclick="backToModeSelect()">擇日再戰</button>
         </div>
     </div>
 
@@ -435,9 +471,7 @@
     <div id="ost-overlay" class="overlay hidden">
         <div class="modal">
             <h2>三國棋 原聲帶</h2>
-            <ul id="ost-list">
-                <!-- Tracks generated by JS -->
-            </ul>
+            <ul id="ost-list"></ul>
             <button class="menu-btn" onclick="closeOST()">返回大廳</button>
         </div>
     </div>
@@ -445,7 +479,7 @@
     <!-- Game Over -->
     <div id="gameover-overlay" class="overlay hidden">
         <div class="modal">
-            <h2 id="winner-title" style="font-family:'Ma Shan Zheng'; font-size:2.5rem; color:#c0392b;">勝負已分</h2>
+            <h2 id="winner-title" style="font-family: var(--font-art); font-size:2.5rem; color:#c0392b;">勝負已分</h2>
             <p id="winner-desc" style="font-size:1.2rem; font-weight:bold;">...</p>
             <button onclick="handleMenuOption('restart')" style="margin-top:20px; font-size:1.2rem; background:#2c3e50;">卷土重来</button>
             <button onclick="handleMenuOption('quit')" style="margin-top:10px; font-size:1.2rem; background:#8b0000;">後會有期</button>
@@ -453,26 +487,46 @@
     </div>
 
 <script>
-/* --- CONFIG: MUSIC PLAYLISTS (MAPPED) --- */
+/* ============================
+   JS Logic
+   ============================ */
+
+const PIECE_VALUE = 100;
+const AI_THINKING_DARK = {
+    'LV1': { depth: 1, breadth: 3, randomness: 0.8 },
+    'LV2': { depth: 1, breadth: 5, randomness: 0.5 },
+    'LV3': { depth: 2, breadth: 8, randomness: 0.3 },
+    'LV4': { depth: 3, breadth: 12, randomness: 0.15 },
+    'LV5': { depth: 4, breadth: 15, randomness: 0.05 }
+};
+const CONTROL_WEIGHTS = [
+    [1, 1, 2, 3, 4, 3, 2, 1, 1],
+    [1, 2, 4, 6, 8, 6, 4, 2, 1],
+    [2, 4, 8, 12, 16, 12, 8, 4, 2],
+    [1, 2, 4, 6, 8, 6, 4, 2, 1],
+    [1, 1, 2, 3, 4, 3, 2, 1, 1]
+];
+
+/* --- CONFIG: MUSIC PLAYLISTS --- */
 const BGM_PLAYLIST = {
-    INTRO: [
+    WAR: [ 
         "https://raw.githubusercontent.com/wjy1976/sango-chess/main/1.Prelude%20Gathering%20Storms.mp3",
-        "https://raw.githubusercontent.com/wjy1976/sango-chess/main/3.Farewell%20The%20Heroes%E2%80%99%20Last%20Departure.mp3" 
+        "https://raw.githubusercontent.com/wjy1976/sango-chess/main/2.War%20Prep%20Iron-Clad%20Orders.mp3" 
     ],
-    MENU:  [
-        "https://raw.githubusercontent.com/wjy1976/sango-chess/main/2.War%20Prep%20Iron-Clad%20Orders.mp3",
+    MENU: [
+        "https://raw.githubusercontent.com/wjy1976/sango-chess/main/3.Farewell%20The%20Heroes%E2%80%99%20Last%20Departure.mp3",
         "https://raw.githubusercontent.com/wjy1976/sango-chess/main/4.March%20Lightning%20Strike%20Assault.mp3" 
     ],
-    GAME:  [
+    GAME: [
         "https://raw.githubusercontent.com/wjy1976/sango-chess/main/5.Ambush%20Encircled%20on%20All%20Sides.mp3",
         "https://raw.githubusercontent.com/wjy1976/sango-chess/main/6.Triumph%20Return%20of%20the%20King.mp3",
         "https://raw.githubusercontent.com/wjy1976/sango-chess/main/7.Dirge%20Besieged%20by%20Foes%20on%20Every%20Side.mp3",
         "https://raw.githubusercontent.com/wjy1976/sango-chess/main/8.The%20Fall%20Retreat%20at%20Huarong%20Trail.mp3"
     ],
-    END:   [
+    END: [
         "https://raw.githubusercontent.com/wjy1976/sango-chess/main/9.The%20End%20Mutual%20Destruction.mp3"
     ],
-    OST:   [         
+    OST: [
         "https://raw.githubusercontent.com/wjy1976/sango-chess/main/1.Prelude%20Gathering%20Storms.mp3",
         "https://raw.githubusercontent.com/wjy1976/sango-chess/main/2.War%20Prep%20Iron-Clad%20Orders.mp3",
         "https://raw.githubusercontent.com/wjy1976/sango-chess/main/3.Farewell%20The%20Heroes%E2%80%99%20Last%20Departure.mp3",
@@ -487,16 +541,16 @@ const BGM_PLAYLIST = {
 
 const OST_TITLES = [
     "序曲：山雨欲來", "備戰：軍令如山", "辭行：壯士一去", "行軍：千里奔襲", 
-    "埋伏：十面埋伏", "凱旋：王者歸來", "悲歌：四面楚歌", "殘局：敗走華容", 
-    "尾聲：玉石俱焚"
+    "埋伏：十面埋伏", "凱旋：王者歸來", "悲歌：四面楚歌", "殘局：玉石俱焚", 
+    "尾聲：大江東去"
 ];
 
 /* --- SOUND MANAGER --- */
 const SoundManager = {
     ctx: null, masterGain: null, convolver: null, activeVoices: [], droneOscs: [],
-    currentBgmAudio: null, mode: 'INTRO', isPlaying: false,
+    currentBgmAudio: null, mode: 'WAR', isPlaying: false,
+    currentOSTIndex: 0,
     
-    // Init
     init: function() {
         if (this.ctx) return;
         const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -505,6 +559,16 @@ const SoundManager = {
         this.masterGain.gain.value = 0.5;
         this.masterGain.connect(this.ctx.destination);
         this.setupReverb();
+    },
+    
+    tryAutoPlayBGM: function() {
+        if (this.isPlaying) return;
+        this.init();
+        if (this.ctx && this.ctx.state === 'suspended') {
+            this.ctx.resume().then(() => this.startBGM());
+        } else {
+            this.startBGM();
+        }
     },
 
     setupReverb: function() {
@@ -520,26 +584,34 @@ const SoundManager = {
         this.convolver.buffer = impulse; this.convolver.connect(this.masterGain);
     },
 
-    // --- BGM LOGIC ---
     startBGM: function() {
         this.isPlaying = true;
-        this.switchTheme('INTRO');
+        this.switchTheme('WAR'); 
+        const hint = document.querySelector('.tap-hint');
+        if(hint) hint.style.display = 'none';
     },
 
     switchTheme: function(theme) {
         if (!this.ctx) return;
         this.stopAllDrones();
-        if (this.currentBgmAudio) { this.currentBgmAudio.pause(); this.currentBgmAudio = null; }
+        
+        if (this.currentBgmAudio) {
+            this.currentBgmAudio.onended = null;
+            this.currentBgmAudio.pause();
+            this.currentBgmAudio = null;
+        }
+
         this.mode = theme; 
         
         const playlist = BGM_PLAYLIST[theme];
+        if (!playlist) return;
+
         const validTracks = playlist.filter(url => url && url.trim() !== "");
 
         if (validTracks.length > 0) {
             this.playRandomTrack(validTracks);
         } else {
-            // Fallback Procedural
-            if (theme === 'INTRO' || theme === 'MENU') this.startWarDrone();
+            if (theme === 'WAR' || theme === 'MENU') this.startWarDrone();
             else this.startPeaceDrone();
         }
     },
@@ -548,37 +620,57 @@ const SoundManager = {
         const url = tracks[Math.floor(Math.random() * tracks.length)];
         const audio = new Audio(url);
         audio.volume = 0.6;
-        audio.play().catch(e => console.log("Audio play blocked:", e));
+        
+        const playPromise = audio.play();
+        if (playPromise !== undefined) {
+            playPromise.catch(e => console.log("Audio play blocked/interrupted:", e));
+        }
+
         this.currentBgmAudio = audio;
         audio.onended = () => {
             if (this.isPlaying && this.mode !== 'OST') {
-                 // Check if mode is still the same. If yes, play next.
                  this.playRandomTrack(tracks);
             }
         };
     },
 
-    // --- OST PLAYER LOGIC ---
     playOSTTrack: function(index) {
         if (!this.ctx) this.init();
+        if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume();
         
-        // Stop Everything
         this.stopAllDrones();
-        if (this.currentBgmAudio) { this.currentBgmAudio.pause(); this.currentBgmAudio = null; }
+        if (this.currentBgmAudio) {
+            this.currentBgmAudio.onended = null;
+            this.currentBgmAudio.pause();
+            this.currentBgmAudio = null;
+        }
         
-        // UI Update
+        this.currentOSTIndex = index;
+
         const listItems = document.querySelectorAll('#ost-list li');
         listItems.forEach(li => li.classList.remove('playing'));
-        listItems[index].classList.add('playing');
+        if(listItems[index]) listItems[index].classList.add('playing');
 
         const url = BGM_PLAYLIST.OST[index];
         if (url && url.trim() !== "") {
             const audio = new Audio(url);
             audio.volume = 0.8;
-            audio.play();
+            
+            const playPromise = audio.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(e => console.log("OST play blocked/interrupted:", e));
+            }
+            
             this.currentBgmAudio = audio;
+            
+            audio.onended = () => {
+                if (SoundManager.mode === 'OST') {
+                    let nextIndex = SoundManager.currentOSTIndex + 1;
+                    if (nextIndex >= BGM_PLAYLIST.OST.length) nextIndex = 0;
+                    SoundManager.playOSTTrack(nextIndex);
+                }
+            };
         } else {
-            // Fake procedural demo for placeholder
             this.playProceduralDemo(index);
         }
     },
@@ -589,7 +681,6 @@ const SoundManager = {
         this.playTone(baseFreq, 'sawtooth', 1, 0.2);
     },
 
-    // --- PROCEDURAL GENERATORS (Fallback) ---
     playTone: function(freq, type, duration, vol=0.1) {
         if (!this.ctx) return;
         const osc = this.ctx.createOscillator(); const gain = this.ctx.createGain();
@@ -613,7 +704,7 @@ const SoundManager = {
     },
     
     playGuqinNote: function() {
-        if (!this.ctx || (this.mode !== 'GAME' && this.mode !== 'END' && this.mode !== 'OST') || this.currentBgmAudio) return; 
+        if (!this.ctx || (this.mode !== 'PEACE' && this.mode !== 'END' && this.mode !== 'OST') || this.currentBgmAudio) return; 
         const scale = [261.63, 293.66, 329.63, 392.00, 440.00, 523.25]; 
         const freq = scale[Math.floor(Math.random() * scale.length)];
         const osc = this.ctx.createOscillator(); const gain = this.ctx.createGain();
@@ -639,9 +730,9 @@ const SoundManager = {
         this.warDrumLoop();
     },
     warDrumLoop: function() {
-        if (!this.isPlaying || (this.mode !== 'INTRO' && this.mode !== 'MENU') || this.currentBgmAudio) return;
+        if (!this.isPlaying || (this.mode !== 'WAR' && this.mode !== 'MENU') || this.currentBgmAudio) return;
         this.playTone(60, 'square', 0.4, 0.2);
-        setTimeout(() => { if((this.mode === 'INTRO' || this.mode === 'MENU') && !this.currentBgmAudio) this.playTone(50, 'square', 0.5, 0.15); }, 2000); 
+        setTimeout(() => { if((this.mode === 'WAR' || this.mode === 'MENU') && !this.currentBgmAudio) this.playTone(50, 'square', 0.5, 0.15); }, 2000); 
         setTimeout(() => this.warDrumLoop(), 4000);
     },
     startPeaceDrone: function() {
@@ -663,17 +754,30 @@ const SoundManager = {
         this.droneOscs = [];
     },
 
-    // --- SFX ---
     playFlip: function() { 
+        const ext = document.getElementById('sfx-flip');
+        if (ext && ext.getAttribute('src')) { ext.currentTime=0; ext.play(); return; }
         this.playNoise(0.05, 0.1); this.playTone(600, 'triangle', 0.05, 0.1); 
     },
     playMove: function() { 
+        const ext = document.getElementById('sfx-move');
+        if (ext && ext.getAttribute('src')) { ext.currentTime=0; ext.play(); return; }
         this.playTone(150, 'square', 0.08, 0.1); 
     }, 
     playCapture: function() { 
+        const ext = document.getElementById('sfx-capture');
+        if (ext && ext.getAttribute('src')) { ext.currentTime=0; ext.play(); return; }
         this.playNoise(0.15, 0.2); this.playTone(80, 'sawtooth', 0.2, 0.3); 
     }
 };
+
+/* --- Initialize --- */
+window.onload = function() {
+    SoundManager.tryAutoPlayBGM();
+};
+document.body.addEventListener('click', function() {
+    SoundManager.tryAutoPlayBGM();
+}, { once: true });
 
 /* --- Config --- */
 const BOARD_W = 9; const BOARD_H = 5; const TOTAL_CELLS = BOARD_W * BOARD_H;
@@ -707,7 +811,8 @@ let gameState = {
     board: [], players: [], turnQueue: [], turnPtr: 0, selectedIdx: -1, validMoves: [], gameOver: false,
     lastActionIdx: -1, isAnimating: false,
     setup: { totalHumans: 0, currentPicker: 0, difficulty: 'LV3' },
-    diceState: { candidates: [], resolvedOrder: [], rolling: false }
+    diceState: { candidates: [], resolvedOrder: [], rolling: false },
+    turnCount: 0
 };
 
 /* --- Intro --- */
@@ -724,9 +829,52 @@ function createEmbers() {
 }
 createEmbers();
 
-function enterGame() {
-    SoundManager.init(); 
-    SoundManager.switchTheme('MENU'); // Switch from INTRO to MENU
+function backToIntro() {
+    document.getElementById('mode-overlay').classList.add('hidden');
+    const intro = document.getElementById('intro-screen');
+    intro.classList.remove('hidden');
+    
+    // Reset to "WAR" theme for the intro
+    document.body.classList.remove('theme-peace');
+    document.body.classList.add('theme-war');
+
+    // Reset styles
+    intro.className = ''; 
+    intro.style.opacity = '1'; // Force visible
+    
+    SoundManager.switchTheme('WAR'); 
+}
+
+function returnToPeaceIntro() {
+    // Hide Game UI
+    document.getElementById('game-header').classList.remove('visible');
+    document.getElementById('board-container').classList.remove('visible');
+    document.getElementById('game-log').classList.remove('visible');
+    document.getElementById('gameover-overlay').classList.add('hidden');
+    document.getElementById('menu-overlay').classList.add('hidden');
+
+    const intro = document.getElementById('intro-screen');
+    intro.classList.remove('hidden');
+    
+    // Force Peace Mode Styles (Important!)
+    document.body.classList.add('theme-peace');
+    document.body.classList.remove('theme-war');
+    
+    intro.style.opacity = '1'; // Force visible
+    
+    SoundManager.switchTheme('PEACE'); 
+}
+
+function backToModeSelect() {
+    document.getElementById('country-overlay').classList.add('hidden');
+    document.getElementById('mode-overlay').classList.remove('hidden');
+}
+
+function enterGame(e) {
+    if(e) e.stopPropagation(); 
+    SoundManager.tryAutoPlayBGM();
+    
+    SoundManager.switchTheme('MENU'); 
     const intro = document.getElementById('intro-screen');
     intro.style.transition = 'opacity 1s';
     intro.style.opacity = '0';
@@ -737,7 +885,10 @@ function enterGame() {
 }
 
 /* --- OST UI Logic --- */
-function openOST() {
+function openOST(e) {
+    if(e) e.stopPropagation();
+    SoundManager.tryAutoPlayBGM();
+
     const list = document.getElementById('ost-list');
     list.innerHTML = '';
     OST_TITLES.forEach((title, idx) => {
@@ -750,14 +901,26 @@ function openOST() {
     document.getElementById('intro-screen').classList.add('hidden'); 
     document.getElementById('ost-overlay').classList.remove('hidden');
     
-    SoundManager.init();
     SoundManager.mode = 'OST';
 }
 
 function closeOST() {
     document.getElementById('ost-overlay').classList.add('hidden');
     document.getElementById('intro-screen').classList.remove('hidden'); 
-    SoundManager.switchTheme('INTRO');
+    
+    // Stop OST playback
+    if (SoundManager.currentBgmAudio) {
+        SoundManager.currentBgmAudio.onended = null;
+        SoundManager.currentBgmAudio.pause();
+        SoundManager.currentBgmAudio = null;
+    }
+    
+    // Decide theme based on class
+    if (document.getElementById('intro-screen').classList.contains('peace-mode')) {
+         SoundManager.switchTheme('PEACE');
+    } else {
+         SoundManager.switchTheme('WAR');
+    }
 }
 
 /* --- Dynamic Koi Generation --- */
@@ -834,8 +997,7 @@ function startSetup(humans) {
     document.body.classList.add('theme-peace');
     document.getElementById('mode-overlay').classList.add('hidden');
     
-    SoundManager.switchTheme('MENU'); // Still MENU during country selection? Or wait, MENU music was for selection.
-    // Let's keep MENU music until game actually starts (after dice)
+    SoundManager.switchTheme('MENU'); // Keep Menu music during setup
     spawnKoi();
     
     gameState.setup.totalHumans = humans;
@@ -850,6 +1012,7 @@ function startSetup(humans) {
         gameState.players[1].name = `電腦A`;
         gameState.players[2].name = `電腦B`;
     }
+    gameState.turnCount = 0; // Reset turn count for new game
     gameState.setup.currentPicker = 0;
     showNextPicker();
 }
@@ -1011,7 +1174,10 @@ function handleMenuOption(type) {
         document.getElementById('game-log').innerHTML = '';
         SoundManager.switchTheme('MENU'); // Restart Music
         startSetup(gameState.setup.totalHumans);
-    } else if (type === 'quit') { location.reload(); }
+    } 
+    else if (type === 'quit') { 
+        returnToPeaceIntro(); // NEW: Special return logic
+    }
 }
 
 /* --- Board --- */
@@ -1183,6 +1349,9 @@ function calculateMoves(idx, boardState = gameState.board, activeArmy = null) {
 function finishTurn() {
     gameState.selectedIdx = -1; gameState.validMoves = [];
     if (checkWin()) return;
+    
+    gameState.turnCount++; // Increment global turn count for AI strategy
+
     let loops = 0;
     do { gameState.turnPtr = (gameState.turnPtr + 1) % 3; loops++; } 
     while (isEliminated(getCurrentPlayer()) && loops < 4);
@@ -1314,4 +1483,4 @@ function endGame(msg) { gameState.gameOver = true; document.getElementById('winn
 function log(msg) { const el = document.getElementById('game-log'); const d = document.createElement('div'); d.className = 'log-line'; d.innerText = msg; el.prepend(d); }
 </script>
 </body>
-</html>
+</html
