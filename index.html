@@ -2,8 +2,10 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>三國暗棋大戰 (錦鯉問鼎版)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>三國暗棋大戰 (天籟之音版)</title>
     <!-- 引入書法字體 -->
     <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Long+Cang&family=Zhi+Mang+Xing&display=swap" rel="stylesheet">
     <style>
@@ -21,7 +23,7 @@
             font-family: "BiauKai", "KaiTi", "標楷體", "Microsoft JhengHei", serif;
             margin: 0; padding: 0;
             display: flex; flex-direction: column; align-items: center;
-            height: 100vh; overflow: hidden;
+            height: 100vh; width: 100vw; overflow: hidden;
             user-select: none; -webkit-user-select: none;
             transition: background 1s ease-in-out; 
         }
@@ -298,6 +300,16 @@
 </head>
 <body class="theme-war">
 
+    <!-- Audio Placeholders (User can replace src) -->
+    <!-- War BGM (Intro) -->
+    <audio id="bgm-war" loop>
+        <source src="" type="audio/mpeg">
+    </audio>
+    <!-- Peace BGM (Game) -->
+    <audio id="bgm-peace" loop>
+        <source src="" type="audio/mpeg">
+    </audio>
+
     <!-- 0. INTRO SCREEN -->
     <div id="intro-screen">
         <div class="battlefield-bg"></div>
@@ -412,43 +424,247 @@
     </div>
 
 <script>
-/* --- Sound Manager --- */
+/* --- SOUND MANAGER V2 (PROCEDURAL GENERATION + EXTERNAL FILE SUPPORT) --- */
 const SoundManager = {
-    ctx: null, isPlaying: false,
+    ctx: null, 
+    masterGain: null,
+    convolver: null,
+    activeVoices: [],
+    droneOscs: [],
+    mode: 'WAR', // 'WAR' or 'PEACE'
+    isPlaying: false,
+
+    // Init
     init: function() {
         if (this.ctx) return;
-        try { window.AudioContext = window.AudioContext || window.webkitAudioContext; this.ctx = new AudioContext(); } catch(e) {}
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        this.ctx = new AudioContext();
+        this.masterGain = this.ctx.createGain();
+        this.masterGain.gain.value = 0.5;
+        this.masterGain.connect(this.ctx.destination);
+        
+        // Setup Reverb (Procedural Impulse)
+        this.setupReverb();
     },
+
+    setupReverb: function() {
+        const duration = 2;
+        const decay = 2;
+        const rate = this.ctx.sampleRate;
+        const length = rate * duration;
+        const impulse = this.ctx.createBuffer(2, length, rate);
+        const impulseL = impulse.getChannelData(0);
+        const impulseR = impulse.getChannelData(1);
+
+        for (let i = 0; i < length; i++) {
+            const n = length - i;
+            // Simple exponential decay noise
+            const noise = (Math.random() * 2 - 1) * Math.pow(1 - i / length, decay);
+            impulseL[i] = noise;
+            impulseR[i] = noise;
+        }
+
+        this.convolver = this.ctx.createConvolver();
+        this.convolver.buffer = impulse;
+        this.convolver.connect(this.masterGain);
+    },
+
+    // --- PROCEDURAL GENERATORS ---
+
+    // 1. Play Tone (Simple SFX)
     playTone: function(freq, type, duration, vol=0.1) {
         if (!this.ctx) return;
-        const osc = this.ctx.createOscillator(); const gain = this.ctx.createGain();
-        osc.type = type; osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
         gain.gain.setValueAtTime(vol, this.ctx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + duration);
-        osc.connect(gain); gain.connect(this.ctx.destination);
-        osc.start(); osc.stop(this.ctx.currentTime + duration);
+        
+        osc.connect(gain);
+        gain.connect(this.masterGain);
+        osc.start();
+        osc.stop(this.ctx.currentTime + duration);
     },
-    playNoise: function(duration) {
+
+    // 2. Play Noise (SFX)
+    playNoise: function(duration, vol=0.1) {
         if (!this.ctx) return;
         const bufferSize = this.ctx.sampleRate * duration;
         const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
         const data = buffer.getChannelData(0);
         for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
-        const noise = this.ctx.createBufferSource(); noise.buffer = buffer;
+
+        const noise = this.ctx.createBufferSource();
+        noise.buffer = buffer;
         const gain = this.ctx.createGain();
-        gain.gain.setValueAtTime(0.1, this.ctx.currentTime);
+        gain.gain.setValueAtTime(vol, this.ctx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + duration);
-        noise.connect(gain); gain.connect(this.ctx.destination); noise.start();
+        
+        noise.connect(gain);
+        gain.connect(this.masterGain);
+        noise.start();
     },
-    playFlip: function() { this.playNoise(0.05); this.playTone(600, 'triangle', 0.05, 0.05); },
-    playMove: function() { this.playTone(150, 'square', 0.08, 0.1); },
-    playCapture: function() { this.playNoise(0.15); this.playTone(80, 'sawtooth', 0.2, 0.25); },
-    startBGM: function() { if (!this.ctx || this.isPlaying) return; this.isPlaying = true; this.drumLoop(); },
-    drumLoop: function() {
-        if (!this.isPlaying) return;
-        this.playTone(60, 'square', 0.3, 0.1);
-        setTimeout(() => { if(this.isPlaying) this.playTone(60, 'square', 0.2, 0.08); }, 1500);
-        setTimeout(() => this.drumLoop(), 3000);
+
+    // 3. Guqin/Guzheng Simulation (Pentatonic Pluck)
+    playGuqinNote: function() {
+        if (!this.ctx || this.mode !== 'PEACE') return;
+        
+        // Pentatonic Scale (C D E G A)
+        // Mid-High range for melody
+        const scale = [261.63, 293.66, 329.63, 392.00, 440.00, 523.25]; 
+        const freq = scale[Math.floor(Math.random() * scale.length)];
+        
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        
+        // Triangle wave sounds softer, like a string
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+        
+        // Envelope: Fast attack, Long slow decay (Pluck style)
+        const now = this.ctx.currentTime;
+        gain.gain.setValueAtTime(0, now);
+        gain.gain.linearRampToValueAtTime(0.15, now + 0.05); // Pluck
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 3); // Ring out
+        
+        // Connect to Reverb for "Valley" feel
+        osc.connect(gain);
+        gain.connect(this.convolver); 
+        
+        osc.start();
+        osc.stop(now + 4);
+        
+        // Schedule next note randomly
+        setTimeout(() => this.playGuqinNote(), 2000 + Math.random() * 4000);
+    },
+
+    // 4. War Drone (Low Frequency Tension)
+    startWarDrone: function() {
+        // Deep Sawtooth with Lowpass Filter
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        const filter = this.ctx.createBiquadFilter();
+        
+        osc.type = 'sawtooth';
+        osc.frequency.value = 55; // Low A
+        
+        filter.type = 'lowpass';
+        filter.frequency.value = 200; // Muffled
+        
+        gain.gain.value = 0.0;
+        
+        osc.connect(filter);
+        filter.connect(gain);
+        gain.connect(this.masterGain);
+        
+        osc.start();
+        // Fade in
+        gain.gain.linearRampToValueAtTime(0.15, this.ctx.currentTime + 2);
+        
+        this.droneOscs.push({osc, gain});
+        
+        // Occasional deep drum
+        this.warDrumLoop();
+    },
+    
+    warDrumLoop: function() {
+        if (!this.isPlaying || this.mode !== 'WAR') return;
+        // Deep Thud
+        this.playTone(60, 'square', 0.4, 0.2);
+        setTimeout(() => { if(this.mode === 'WAR') this.playTone(50, 'square', 0.5, 0.15); }, 2000); // Heartbeat style
+        setTimeout(() => this.warDrumLoop(), 4000);
+    },
+
+    // 5. Peace Drone (Ethereal Pad)
+    startPeaceDrone: function() {
+        // Two Sine waves detuned slightly for "shimmering" water effect
+        const freqs = [196.00, 220.00]; // G3, A3
+        
+        freqs.forEach(f => {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.value = f;
+            gain.gain.value = 0;
+            
+            osc.connect(gain);
+            gain.connect(this.convolver); // Reverb makes it "Pad" like
+            osc.start();
+            
+            // Slow breath
+            gain.gain.linearRampToValueAtTime(0.05, this.ctx.currentTime + 3);
+            
+            this.droneOscs.push({osc, gain});
+        });
+        
+        // Start Melody
+        this.playGuqinNote();
+    },
+
+    // --- CONTROLS ---
+
+    startBGM: function() {
+        this.isPlaying = true;
+        // Try external first? No, lets stick to procedural for consistency unless user edits HTML
+        // Check if user provided valid src in HTML audio tags
+        const extWar = document.getElementById('bgm-war');
+        const extPeace = document.getElementById('bgm-peace');
+        
+        if (extWar.src && extWar.src !== window.location.href) {
+            // User has custom file
+            extWar.play().catch(e=>console.log("Auto-play blocked"));
+        } else {
+            // Use Procedural
+            this.mode = 'WAR';
+            this.startWarDrone();
+        }
+    },
+
+    switchTheme: function(theme) {
+        if (!this.ctx) return;
+        this.stopAllDrones();
+        this.mode = theme; // 'WAR' or 'PEACE'
+        
+        // External File Check
+        const extWar = document.getElementById('bgm-war');
+        const extPeace = document.getElementById('bgm-peace');
+        
+        // Stop Externals
+        extWar.pause(); extWar.currentTime = 0;
+        extPeace.pause(); extPeace.currentTime = 0;
+
+        if (theme === 'PEACE') {
+             if (extPeace.src && extPeace.src !== window.location.href) {
+                 extPeace.play();
+             } else {
+                 this.startPeaceDrone();
+             }
+        } else {
+             if (extWar.src && extWar.src !== window.location.href) {
+                 extWar.play();
+             } else {
+                 this.startWarDrone();
+             }
+        }
+    },
+
+    stopAllDrones: function() {
+        this.droneOscs.forEach(o => {
+            try {
+                o.gain.gain.linearRampToValueAtTime(0, this.ctx.currentTime + 1);
+                o.osc.stop(this.ctx.currentTime + 1);
+            } catch(e){}
+        });
+        this.droneOscs = [];
+    },
+
+    // --- SFX CALLS ---
+    playFlip: function() { this.playNoise(0.05, 0.1); this.playTone(600, 'triangle', 0.05, 0.1); },
+    playMove: function() { this.playTone(150, 'square', 0.08, 0.1); }, // Wood tap
+    playCapture: function() { 
+        this.playNoise(0.15, 0.2); 
+        this.playTone(80, 'sawtooth', 0.2, 0.3); // Heavy slash
     }
 };
 
@@ -502,7 +718,8 @@ function createEmbers() {
 createEmbers();
 
 function enterGame() {
-    SoundManager.init(); SoundManager.startBGM();
+    SoundManager.init(); 
+    SoundManager.startBGM(); // Start War Ambience
     const intro = document.getElementById('intro-screen');
     intro.style.transition = 'opacity 1s';
     intro.style.opacity = '0';
@@ -514,45 +731,25 @@ function enterGame() {
 
 /* --- Dynamic Koi Generation --- */
 function getKoiSVG(type, uid) {
-    // Basic body gradient & colors based on Type
-    let defs = '';
-    let patterns = '';
-    
-    // Common Filters
+    let defs = ''; let patterns = '';
     const filterId = `blur-${uid}`;
     defs += `<filter id="${filterId}"><feGaussianBlur stdDeviation="0.8" /></filter>`;
-    
-    // Body Gradient
     const bodyGradId = `bodyGrad-${uid}`;
     let c1, c2;
-    
-    if (type === 'OGON') { // Gold
-        c1 = '#ffd700'; c2 = '#e6ac00';
-    } else { // White base (Kohaku, Sanke, Tancho)
-        c1 = '#fffaf0'; c2 = '#e6e6e6';
-    }
-    
+    if (type === 'OGON') { c1 = '#ffd700'; c2 = '#e6ac00'; } else { c1 = '#fffaf0'; c2 = '#e6e6e6'; }
     defs += `<radialGradient id="${bodyGradId}" cx="40%" cy="50%" r="50%">
-                <stop offset="0%" stop-color="${c1}"/>
-                <stop offset="100%" stop-color="${c2}"/>
+                <stop offset="0%" stop-color="${c1}"/><stop offset="100%" stop-color="${c2}"/>
              </radialGradient>`;
-
-    // Patterns
     if (type === 'KOHAKU' || type === 'SANKE') {
-        // Random Red Spots
         patterns += `<circle cx="170" cy="50" r="${10 + Math.random()*5}" fill="#d32f2f" opacity="0.8" filter="url(#${filterId})"/>`;
         patterns += `<ellipse cx="100" cy="50" rx="${15 + Math.random()*10}" ry="${10 + Math.random()*5}" fill="#d32f2f" opacity="0.8" filter="url(#${filterId})"/>`;
         patterns += `<circle cx="40" cy="50" r="${8 + Math.random()*4}" fill="#d32f2f" opacity="0.8" filter="url(#${filterId})"/>`;
     }
-    
     if (type === 'SANKE') {
-        // Add Black Spots
         patterns += `<circle cx="${120 + Math.random()*20}" cy="${35 + Math.random()*10}" r="${4 + Math.random()*3}" fill="#111" opacity="0.7" filter="url(#${filterId})"/>`;
         patterns += `<circle cx="${70 + Math.random()*20}" cy="${60 + Math.random()*10}" r="${3 + Math.random()*3}" fill="#111" opacity="0.7" filter="url(#${filterId})"/>`;
     }
-    
     if (type === 'TANCHO') {
-        // Red spot on head only
         patterns += `<circle cx="185" cy="50" r="12" fill="#d32f2f" opacity="0.9" filter="url(#${filterId})"/>`;
     }
 
@@ -560,20 +757,11 @@ function getKoiSVG(type, uid) {
     <svg width="200" height="100" viewBox="0 0 200 100" overflow="visible">
         <defs>${defs}</defs>
         <g class="koi-body-group">
-            <!-- Tail (Integrated) -->
-            <path class="koi-tail" d="M30,50 Q0,20 -20,30 Q10,50 -20,70 Q0,80 30,50" 
-                  fill="rgba(255,255,255,0.7)" stroke="#ccc" stroke-width="0.5" transform-origin="30 50" />
-            <!-- Fins -->
-            <path class="koi-fin-l" d="M120,30 Q100,-10 70,10 Q100,20 120,30" 
-                  fill="rgba(255,255,255,0.6)" stroke="#ccc" stroke-width="0.5" transform-origin="120 30" />
-            <path class="koi-fin-r" d="M120,70 Q100,110 70,90 Q100,80 120,70" 
-                  fill="rgba(255,255,255,0.6)" stroke="#ccc" stroke-width="0.5" transform-origin="120 70" />
-            <!-- Body (Sharper Head) -->
-            <path d="M205,50 Q160,15 30,40 L30,60 Q160,85 205,50 Z" 
-                  fill="url(#${bodyGradId})" stroke="#ccc" stroke-width="0.5" />
-            <!-- Patterns -->
+            <path class="koi-tail" d="M30,50 Q0,20 -20,30 Q10,50 -20,70 Q0,80 30,50" fill="rgba(255,255,255,0.7)" stroke="#ccc" stroke-width="0.5" transform-origin="30 50" />
+            <path class="koi-fin-l" d="M120,30 Q100,-10 70,10 Q100,20 120,30" fill="rgba(255,255,255,0.6)" stroke="#ccc" stroke-width="0.5" transform-origin="120 30" />
+            <path class="koi-fin-r" d="M120,70 Q100,110 70,90 Q100,80 120,70" fill="rgba(255,255,255,0.6)" stroke="#ccc" stroke-width="0.5" transform-origin="120 70" />
+            <path d="M205,50 Q160,15 30,40 L30,60 Q160,85 205,50 Z" fill="url(#${bodyGradId})" stroke="#ccc" stroke-width="0.5" />
             ${patterns}
-            <!-- Eyes (Forward) -->
             <circle cx="198" cy="40" r="2.5" fill="white"/> <circle cx="199" cy="40" r="1" fill="black"/>
             <circle cx="198" cy="60" r="2.5" fill="white"/> <circle cx="199" cy="60" r="1" fill="black"/>
         </g>
@@ -583,56 +771,29 @@ function getKoiSVG(type, uid) {
 function spawnKoi() {
     const layer = document.getElementById('fish-layer');
     if (!layer || document.body.classList.contains('theme-war')) return;
-
-    const div = document.createElement('div');
-    div.className = 'koi-unit';
-    
-    // Pick Type
+    const div = document.createElement('div'); div.className = 'koi-unit';
     const types = ['KOHAKU', 'SANKE', 'OGON', 'TANCHO'];
     const type = types[Math.floor(Math.random() * types.length)];
     const uid = Math.floor(Math.random() * 10000);
-    
     div.innerHTML = getKoiSVG(type, uid);
-    
-    // Position Logic
-    const w = window.innerWidth;
-    const h = window.innerHeight;
-    const offset = 250;
-    
-    const side = Math.floor(Math.random() * 4); // 0:Top, 1:Right, 2:Bottom, 3:Left
+    const w = window.innerWidth; const h = window.innerHeight; const offset = 250;
+    const side = Math.floor(Math.random() * 4);
     let startX, startY, endX, endY;
-    
     if (side === 0) { startX = Math.random()*w; startY = -offset; endX = Math.random()*w; endY = h+offset; }
     else if (side === 1) { startX = w+offset; startY = Math.random()*h; endX = -offset; endY = Math.random()*h; }
     else if (side === 2) { startX = Math.random()*w; startY = h+offset; endX = Math.random()*w; endY = -offset; }
     else { startX = -offset; startY = Math.random()*h; endX = w+offset; endY = Math.random()*h; }
-    
-    const dx = endX - startX;
-    const dy = endY - startY;
+    const dx = endX - startX; const dy = endY - startY;
     let angle = Math.atan2(dy, dx) * 180 / Math.PI;
-    // No offset needed for new SVG orientation (0 deg = Right)
-    
-    div.style.left = startX + 'px';
-    div.style.top = startY + 'px';
+    div.style.left = startX + 'px'; div.style.top = startY + 'px';
     const scale = 0.6 + Math.random() * 0.6;
     div.style.transform = `rotate(${angle}deg) scale(${scale})`;
-    
     layer.appendChild(div);
-    
-    // Animate
     const duration = 15 + Math.random() * 15;
-    
-    // Force reflow
     void div.offsetWidth;
-    
     div.style.transition = `left ${duration}s linear, top ${duration}s linear`;
-    div.style.left = endX + 'px';
-    div.style.top = endY + 'px';
-    
-    // Cleanup
+    div.style.left = endX + 'px'; div.style.top = endY + 'px';
     setTimeout(() => { if(div.parentNode) div.parentNode.removeChild(div); }, duration * 1000);
-    
-    // Next Spawn
     setTimeout(spawnKoi, 3000 + Math.random() * 5000);
 }
 
@@ -642,7 +803,8 @@ function startSetup(humans) {
     document.body.classList.add('theme-peace');
     document.getElementById('mode-overlay').classList.add('hidden');
     
-    spawnKoi(); // Start the loop
+    SoundManager.switchTheme('PEACE'); // Switch BGM
+    spawnKoi();
     
     gameState.setup.totalHumans = humans;
     gameState.setup.difficulty = document.getElementById('difficulty').value;
@@ -663,15 +825,8 @@ function startSetup(humans) {
 function showNextPicker() {
     const taken = gameState.players.map(pl => pl.country).filter(c => c);
     const avail = [COUNTRY_SHU, COUNTRY_WU, COUNTRY_WEI].filter(c => !taken.includes(c));
-    
     if (gameState.setup.currentPicker >= 3) { finishSetup(); return; }
-
-    // AUTO-ASSIGN if only 1 left
-    if (avail.length === 1) {
-        selectCountryLogic(avail[0]);
-        return;
-    }
-
+    if (avail.length === 1) { selectCountryLogic(avail[0]); return; }
     const p = gameState.players[gameState.setup.currentPicker];
     if (p.type === 'HUMAN') {
         const overlay = document.getElementById('country-overlay');
@@ -805,24 +960,17 @@ function finalizeOrder(finalArr) {
 }
 
 /* --- Menu Logic --- */
-function showInGameMenu() {
-    document.getElementById('menu-overlay').classList.remove('hidden');
-}
-function closeInGameMenu() {
-    document.getElementById('menu-overlay').classList.add('hidden');
-}
+function showInGameMenu() { document.getElementById('menu-overlay').classList.remove('hidden'); }
+function closeInGameMenu() { document.getElementById('menu-overlay').classList.add('hidden'); }
 function handleMenuOption(type) {
     document.getElementById('menu-overlay').classList.add('hidden');
     document.getElementById('gameover-overlay').classList.add('hidden');
-    if (type === 'draw') {
-        endGame("平分秋色 - 握手言和");
-    } else if (type === 'restart') {
+    if (type === 'draw') { endGame("平分秋色 - 握手言和"); } 
+    else if (type === 'restart') {
         document.getElementById('board').innerHTML = '';
         document.getElementById('game-log').innerHTML = '';
         startSetup(gameState.setup.totalHumans);
-    } else if (type === 'quit') {
-        location.reload(); 
-    }
+    } else if (type === 'quit') { location.reload(); }
 }
 
 /* --- Board --- */
@@ -951,13 +1099,13 @@ function executeMove(from, to) {
     }, t ? 750 : 400);
 }
 
-function calculateMoves(idx, activeArmy = null) {
-    const piece = gameState.board[idx]; if (!piece) return [];
+function calculateMoves(idx, boardState = gameState.board, activeArmy = null) {
+    const piece = boardState[idx]; if (!piece) return [];
     const myArmy = activeArmy || getCurrentPlayer().army;
     const moves = []; const cx = idx % BOARD_W, cy = Math.floor(idx / BOARD_W);
     const checkDest = (tx, ty) => {
         if (tx < 0 || tx >= BOARD_W || ty < 0 || ty >= BOARD_H) return false;
-        const tidx = ty * BOARD_W + tx; const target = gameState.board[tidx];
+        const tidx = ty * BOARD_W + tx; const target = boardState[tidx];
         if (!target) { moves.push(tidx); return false; }
         if (!target.revealed) return true;
         if (target.group === myArmy) return true;
@@ -971,7 +1119,7 @@ function calculateMoves(idx, activeArmy = null) {
         [[0,1],[0,-1],[1,0],[-1,0]].forEach(([dx, dy]) => {
             let x=cx+dx, y=cy+dy;
             while (x>=0 && x<BOARD_W && y>=0 && y<BOARD_H) {
-                const tidx = y*BOARD_W+x, target = gameState.board[tidx];
+                const tidx = y*BOARD_W+x, target = boardState[tidx];
                 if (!target) moves.push(tidx);
                 else { if (target.revealed && target.group !== myArmy) moves.push(tidx); break; }
                 x+=dx; y+=dy;
@@ -981,7 +1129,7 @@ function calculateMoves(idx, activeArmy = null) {
         [[0,1],[0,-1],[1,0],[-1,0]].forEach(([dx, dy]) => {
             let x=cx+dx, y=cy+dy, screen=false;
             while (x>=0 && x<BOARD_W && y>=0 && y<BOARD_H) {
-                const tidx = y*BOARD_W+x, target = gameState.board[tidx];
+                const tidx = y*BOARD_W+x, target = boardState[tidx];
                 if (!screen) { if (!target) moves.push(tidx); else screen=true; }
                 else if (target) { if (target.revealed && target.group !== myArmy) moves.push(tidx); break; }
                 x+=dx; y+=dy;
@@ -1054,7 +1202,7 @@ function aiMove() {
                             for (let i = 0; i < TOTAL_CELLS; i++) {
                                 const enemy = gameState.board[i];
                                 if (enemy && enemy.revealed && enemy.group !== p.army) {
-                                    const enemyMoves = calculateMoves(i, enemy.group);
+                                    const enemyMoves = calculateMoves(i, gameState.board, enemy.group);
                                     if (enemyMoves.includes(to)) {
                                         threatScore += myVal; 
                                         if (diff === 'LV5' && myVal >= 50) threatScore += 30; 
