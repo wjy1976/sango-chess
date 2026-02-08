@@ -1,0 +1,1101 @@
+﻿<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>三國暗棋大戰 (錦鯉問鼎版)</title>
+    <!-- 引入書法字體 -->
+    <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Long+Cang&family=Zhi+Mang+Xing&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #dcdcdc;
+            --board-bg: #cda676;
+            --grid-line: #463325;
+            /* Country Colors */
+            --shu-color: #2ecc71; /* Green */
+            --wu-color: #e74c3c;  /* Red */
+            --wei-color: #3498db; /* Blue */
+        }
+
+        body {
+            font-family: "BiauKai", "KaiTi", "標楷體", "Microsoft JhengHei", serif;
+            margin: 0; padding: 0;
+            display: flex; flex-direction: column; align-items: center;
+            height: 100vh; overflow: hidden;
+            user-select: none; -webkit-user-select: none;
+            transition: background 1s ease-in-out; 
+        }
+
+        /* =========================================
+           THEME 1: WAR (Intro & Menu)
+           ========================================= */
+        body.theme-war {
+            background-color: #1a0505;
+            background-image: 
+                radial-gradient(circle at 50% 30%, #4a0e0e 0%, #1a0505 80%),
+                url("data:image/svg+xml,%3Csvg width='800' height='600' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.1'/%3E%3C/svg%3E");
+            color: #fff;
+        }
+
+        #intro-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 9999;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+        }
+
+        .battlefield-bg {
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 40%;
+            background-repeat: repeat-x; background-position: bottom; background-size: auto 100%;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 300' preserveAspectRatio='none'%3E%3Cpath d='M0,300 L0,200 Q100,150 200,220 Q300,280 400,200 T600,220 T800,180 T1000,240 L1200,200 L1200,300 Z' fill='%23000' opacity='0.6'/%3E%3Cpath d='M0,300 L0,250 Q150,200 300,270 T600,240 T900,260 L1200,230 L1200,300 Z' fill='%23000' opacity='0.8'/%3E%3Cg fill='%23000'%3E%3Crect x='50' y='180' width='2' height='100'/%3E%3Cpath d='M50,180 L80,190 L50,210 Z'/%3E%3Crect x='250' y='200' width='2' height='100' transform='rotate(10 250 300)'/%3E%3Cpath d='M250,200 L280,210 L250,230 Z' transform='rotate(10 250 300)'/%3E%3Crect x='850' y='160' width='3' height='140'/%3E%3Cpath d='M850,160 L900,180 L850,220 Z'/%3E%3C/g%3E%3C/svg%3E");
+            opacity: 0.8; pointer-events: none;
+        }
+
+        .ember {
+            position: absolute; bottom: -10px; width: 4px; height: 4px; background: #ff4500; border-radius: 50%;
+            box-shadow: 0 0 10px #ff4500, 0 0 20px #ffff00;
+            animation: rise 4s linear infinite; pointer-events: none;
+        }
+        @keyframes rise { 0% {bottom: -10px; opacity: 1;} 100% {bottom: 100%; opacity: 0; transform: translateX(50px);} }
+
+        .intro-text-container { position: relative; z-index: 10; text-align: center; padding: 20px; animation: fadeIn 2s ease-out; }
+        @keyframes fadeIn { from {opacity: 0; transform: scale(0.9);} to {opacity: 1; transform: scale(1);} }
+
+        .intro-sub { font-family: 'Ma Shan Zheng', cursive; font-size: 2.5rem; color: #d4af37; text-shadow: 2px 2px 4px #000; margin-bottom: 10px; letter-spacing: 5px; }
+        .intro-main {
+            font-family: 'Ma Shan Zheng', cursive; font-size: 5rem;
+            background: linear-gradient(to bottom, #ff0000 30%, #800000 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            text-shadow: 0px 0px 20px rgba(255, 0, 0, 0.5); margin: 0; line-height: 1.2; letter-spacing: 10px; position: relative;
+        }
+        .intro-main::after {
+            content: attr(data-text); position: absolute; left: 0; top: 0; width: 100%; height: 100%;
+            background: linear-gradient(to bottom, transparent 40%, #500 90%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            opacity: 0.5; filter: blur(1px); z-index: -1;
+        }
+
+        .start-btn {
+            margin-top: 60px; font-family: 'Ma Shan Zheng', cursive; font-size: 2.5rem;
+            padding: 15px 60px; background: transparent; color: #d4af37;
+            border: 3px solid #d4af37; border-radius: 5px; cursor: pointer;
+            text-shadow: 0 0 10px #d4af37; box-shadow: 0 0 20px rgba(212, 175, 55, 0.2), inset 0 0 20px rgba(0,0,0,0.5);
+            transition: all 0.3s; position: relative; overflow: hidden; z-index: 10;
+        }
+        .start-btn:hover { background: rgba(212, 175, 55, 0.1); transform: scale(1.05); box-shadow: 0 0 40px rgba(212, 175, 55, 0.6), inset 0 0 30px rgba(0,0,0,0.8); color: #fff; border-color: #fff; }
+        .start-btn::before {
+            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.2), transparent 60%);
+            transform: rotate(45deg); animation: shine 3s infinite linear; pointer-events: none;
+        }
+        @keyframes shine { 0% {transform: rotate(45deg) translateY(-100%);} 100% {transform: rotate(45deg) translateY(100%);} }
+
+        /* =========================================
+           THEME 2: PEACE (Game Board)
+           ========================================= */
+        body.theme-peace {
+            background-color: #f0f0f0;
+            background-image: 
+                linear-gradient(to bottom, rgba(240,240,240,0.9) 0%, rgba(240,240,240,0.2) 60%, rgba(240,240,240,0.8) 100%),
+                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1000 600' preserveAspectRatio='none'%3E%3Cpath d='M0,400 Q150,350 300,420 T600,380 T900,410 L1000,380 L1000,600 L0,600 Z' fill='%23a0a0a0' opacity='0.3'/%3E%3Cpath d='M-100,600 L-100,450 Q100,400 300,500 T700,450 T1100,500 L1100,600 Z' fill='%23606060' opacity='0.4'/%3E%3Cpath d='M800,0 L805,150' stroke='%23333' stroke-width='2' opacity='0.1'/%3E%3Cpath d='M850,20 L852,100' stroke='%23333' stroke-width='1' opacity='0.1'/%3E%3Ccircle cx='900' cy='100' r='30' fill='%23cc3333' opacity='0.1' /%3E%3Cpath d='M0,600 Q50,450 150,500' stroke='%23222' stroke-width='3' fill='none' opacity='0.6'/%3E%3Cpath d='M150,500 L180,480' stroke='%23222' stroke-width='2' fill='none' opacity='0.6'/%3E%3C/svg%3E");
+            background-size: cover;
+            background-position: center bottom;
+            color: #333;
+        }
+
+        /* --- Koi Fish Layers --- */
+        #fish-layer {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 0;
+            overflow: hidden;
+            display: none;
+        }
+        body.theme-peace #fish-layer { display: block; }
+
+        .koi-unit { position: absolute; pointer-events: none; }
+
+        /* Internal Fish Animations */
+        .koi-body-group { 
+            animation: fish-swim 1s ease-in-out infinite alternate;
+            transform-origin: 100px 50px; 
+        }
+        .koi-tail { 
+            transform-origin: 30px 50px; 
+            animation: tail-wag 0.8s ease-in-out infinite alternate; 
+        }
+        .koi-fin-l { 
+            transform-origin: 120px 30px; 
+            animation: fin-wave-l 1.2s ease-in-out infinite alternate; 
+        }
+        .koi-fin-r { 
+            transform-origin: 120px 70px; 
+            animation: fin-wave-r 1.2s ease-in-out infinite alternate; 
+        }
+
+        @keyframes tail-wag { 0% { transform: rotate(15deg); } 100% { transform: rotate(-15deg); } }
+        @keyframes fish-swim { 0% { transform: translateY(-1px) rotate(0.5deg); } 100% { transform: translateY(1px) rotate(-0.5deg); } }
+        @keyframes fin-wave-l { 0% { transform: rotate(0deg); } 100% { transform: rotate(30deg); } }
+        @keyframes fin-wave-r { 0% { transform: rotate(0deg); } 100% { transform: rotate(-30deg); } }
+
+        /* --- Header (Game) --- */
+        #game-header {
+            width: 95%; max-width: 800px; padding: 10px 15px; margin-top: 10px;
+            background: linear-gradient(to right, rgba(20,20,20,0.9), rgba(40,40,40,0.9));
+            color: #f0e6d2;
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.6); border-radius: 8px; z-index: 10;
+            border: 1px solid #5c4033;
+            transition: opacity 0.5s; opacity: 0;
+        }
+        #game-header.visible { opacity: 1; }
+
+        .header-btn {
+            background: #8b4513; color: white; border: 1px solid #a0522d;
+            padding: 5px 12px; font-size: 1rem; border-radius: 4px; cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.5); margin-left: 10px;
+            font-family: 'BiauKai'; font-weight: bold;
+        }
+        .header-btn:hover { background: #a0522d; }
+
+        .player-badge {
+            flex: 1; margin: 0 5px; padding: 5px; border-radius: 6px;
+            font-size: 1rem; font-weight: bold; opacity: 0.5;
+            transition: all 0.3s; border: 2px solid #555;
+            display: flex; flex-direction: column; align-items: center;
+            background: rgba(0,0,0,0.6); position: relative; text-shadow: 1px 1px 2px black;
+        }
+        .player-badge.active {
+            opacity: 1; transform: scale(1.05); background: rgba(50,50,50,0.9);
+            box-shadow: 0 0 15px #ffd700; border-color: #ffd700 !important; color: #fff;
+        }
+        .player-badge.active::after {
+            content: '在此'; position: absolute; bottom: -22px;
+            background: #ffd700; color: #000; font-size: 0.8rem; font-weight:900;
+            padding: 2px 8px; border-radius: 4px; white-space: nowrap; z-index: 20;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+        }
+        .army-info { font-size: 0.85rem; margin-top: 4px; font-weight: normal; color: #ccc; font-family: "Microsoft JhengHei", sans-serif; }
+        .order-badge { 
+            position: absolute; top: -8px; right: -8px; background: #c0392b; color: white; border: 2px solid #fff; border-radius: 50%; width: 24px; height: 24px; font-size: 0.9rem; font-weight:bold; display: flex; justify-content: center; align-items: center; box-shadow: 2px 2px 5px rgba(0,0,0,0.5); display: none; 
+        }
+
+        /* --- Board --- */
+        #board-container {
+            flex: 1; display: flex; justify-content: center; align-items: center;
+            width: 100%; padding: 10px; box-sizing: border-box;
+            transition: opacity 0.5s; opacity: 0; z-index: 5;
+        }
+        #board-container.visible { opacity: 1; }
+
+        #board {
+            display: grid; grid-template-columns: repeat(9, 1fr); grid-template-rows: repeat(5, 1fr);
+            width: 100%; max-width: 850px; aspect-ratio: 9/5; position: relative;
+            background-color: #cda676; 
+            background-image: repeating-linear-gradient(45deg, rgba(0,0,0,0.02) 0px, rgba(0,0,0,0.02) 2px, transparent 2px, transparent 4px), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.15'/%3E%3C/svg%3E");
+            border: 10px solid #5c4033; border-radius: 4px;
+            box-shadow: inset 0 0 30px rgba(0,0,0,0.5), 0 20px 40px rgba(0,0,0,0.6); padding: 5px;
+        }
+
+        .cell { position: relative; display: flex; justify-content: center; align-items: center; cursor: pointer; }
+        .cell::before { content: ''; position: absolute; width: 100%; height: 2px; background-color: #4a3b2a; z-index: 0; top: 50%; left: 0; opacity: 0.8; }
+        .cell::after { content: ''; position: absolute; height: 100%; width: 2px; background-color: #4a3b2a; z-index: 0; left: 50%; top: 0; opacity: 0.8; }
+        .cell:nth-child(9n+1)::before { width: 50%; left: 50%; }
+        .cell:nth-child(9n)::before { width: 50%; left: 0; }
+        .cell:nth-child(-n+9)::after { height: 50%; top: 50%; }
+        .cell:nth-last-child(-n+9)::after { height: 50%; top: 0; }
+
+        .piece {
+            width: 82%; height: 82%; border-radius: 50%;
+            display: flex; justify-content: center; align-items: center;
+            position: relative; z-index: 2;
+            font-family: "BiauKai", "KaiTi", "標楷體", serif; font-size: 2.2rem; font-weight: 900;
+            background: radial-gradient(circle at 35% 35%, #fdf5e6, #e6d2b5 80%);
+            box-shadow: inset 2px 2px 5px rgba(255,255,255,0.7), inset -2px -2px 5px rgba(0,0,0,0.3), 3px 5px 10px rgba(0,0,0,0.5);
+            border: 1px solid #b0a080;
+            transform-origin: center center; will-change: transform; text-shadow: 0 1px 0 rgba(255,255,255,0.5);
+        }
+        .piece::before { content: ''; position: absolute; width: 85%; height: 85%; border-radius: 50%; border: 1px solid rgba(0,0,0,0.1); pointer-events: none; }
+        @media (max-width: 600px) { .piece { font-size: 1.5rem; } }
+
+        .piece.back {
+            background: radial-gradient(circle at 30% 30%, #5c4033, #3e2723); border: 2px solid #8d6e63; color: transparent;
+        }
+        /* CHANGE: Back character to '鼎' with bigger, Qin/Han style */
+        .piece.back::after { 
+            content: '鼎'; 
+            color: #daa520; /* Bronze Gold */
+            font-size: 2.2rem; 
+            text-shadow: 1px 1px 2px #000, 0 0 5px rgba(212, 175, 55, 0.3);
+            /* Ancient style font stack */
+            font-family: "Zhi Mang Xing", "LiSu", "SimLi", "Ma Shan Zheng", cursive;
+            font-weight: normal;
+        }
+        @media (max-width: 600px) { .piece.back::after { font-size: 1.6rem; } }
+
+        .piece.text-red { color: #b71c1c; } .piece.text-black { color: #1a1a1a; }
+        .piece.selected { transform: scale(1.15) translateY(-8px); box-shadow: 0 20px 30px rgba(0,0,0,0.4), 0 0 0 3px #ffd700; z-index: 100; }
+        .piece.blinking { animation: blink 1.5s infinite ease-in-out; }
+        @keyframes blink { 0%,100% { box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.2); } 50% { box-shadow: 0 0 0 4px rgba(255, 215, 0, 0.8); } }
+        .piece.dying { animation: ghost-effect 0.8s ease-out forwards; z-index: 1 !important; filter: grayscale(100%) sepia(50%) hue-rotate(-50deg) saturate(200%); }
+        @keyframes ghost-effect { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.2); opacity: 0.5; } 100% { transform: scale(1.5); opacity: 0; } }
+        
+        .hint-move { position: absolute; width: 20%; height: 20%; background: rgba(46, 204, 113, 0.8); border-radius: 50%; z-index: 5; box-shadow: 0 0 5px rgba(46, 204, 113, 0.8); }
+        .hint-kill { position: absolute; width: 90%; height: 90%; border: 4px dashed rgba(231, 76, 60, 0.9); border-radius: 50%; z-index: 5; animation: spin 6s linear infinite; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        /* --- UI Overlay Elements (General) --- */
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: flex; justify-content: center; align-items: center; z-index: 200; backdrop-filter: blur(5px); }
+        .overlay.hidden { display: none; }
+        
+        /* Modal Style */
+        #mode-overlay .modal {
+            background: linear-gradient(to bottom, #2c1e1e, #1a0a0a);
+            border: 2px solid #8b4513;
+            box-shadow: 0 0 30px rgba(255, 69, 0, 0.3), inset 0 0 20px rgba(0,0,0,0.8);
+            color: #d4af37; width: 85%; max-width: 400px; padding: 30px; border-radius: 8px; text-align: center;
+        }
+        #mode-overlay h2 { font-family: 'Ma Shan Zheng'; color: #ff4500; text-shadow: 0 0 10px rgba(255, 69, 0, 0.5); font-size: 2.2rem; }
+        #mode-overlay label { color: #d4af37; }
+        #mode-overlay select { background: #333; color: #fff; border: 1px solid #555; }
+        #mode-overlay .menu-btn {
+            background: linear-gradient(to bottom, #800000, #500000);
+            border: 1px solid #ff4500; color: #fff;
+            font-family: 'Ma Shan Zheng'; font-size: 1.5rem;
+            margin: 10px 0; width: 100%; padding: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+        #mode-overlay .menu-btn:hover { background: linear-gradient(to bottom, #a00000, #700000); box-shadow: 0 0 15px rgba(255, 69, 0, 0.6); }
+
+        .modal { background: #fff; padding: 30px; border-radius: 12px; text-align: center; width: 85%; max-width: 400px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); border: 4px solid #34495e; }
+        h3 { margin-top: 0; color: #2c3e50; font-family:'BiauKai'; font-size:1.8rem; }
+        
+        .faction-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 20px; }
+        .faction-btn {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: 15px 5px; height: 100px; font-family: "BiauKai"; width: 100%;
+            background: #d35400; color: white; border: none; font-size: 1.1rem; cursor: pointer; border-radius: 6px;
+        }
+        .faction-btn h4 { font-size: 1.8rem; margin: 0; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); }
+        
+        #dice-container { display: flex; justify-content: space-around; margin: 20px 0; min-height: 60px; }
+        .dice-wrapper { display: flex; flex-direction: column; align-items: center; }
+        .dice { width: 50px; height: 50px; background: #fff; border-radius: 8px; display: flex; justify-content: center; align-items: center; font-size: 1.8rem; font-weight: bold; border: 2px solid #ccc; box-shadow: 0 3px 5px rgba(0,0,0,0.2); }
+        .dice-label { font-size: 0.8rem; color: #555; margin-top: 5px; }
+        #roll-btn { background: #d35400; color: white; border: none; padding: 10px 30px; font-size: 1.2rem; border-radius: 5px; cursor: pointer; font-weight: bold; }
+
+        #game-log { height: 90px; width: 95%; max-width: 800px; background: rgba(0,0,0,0.8); overflow-y: auto; padding: 8px; font-size: 0.9rem; color: #ddd; border-top: 2px solid #555; margin-top: 10px; border-radius: 4px; transition: opacity 0.5s; opacity: 0; }
+        #game-log.visible { opacity: 1; }
+        .log-line { border-bottom: 1px solid #444; padding: 2px 0; }
+
+        .diff-select { margin-bottom: 20px; text-align: left; padding: 10px; border: 1px solid #8b4513; border-radius: 5px; background: rgba(0,0,0,0.3); }
+        .diff-select select { width: 100%; padding: 8px; margin-top: 5px; }
+
+        @media (max-width: 768px) {
+            .intro-sub { font-size: 1.5rem; }
+            .intro-main { font-size: 3rem; letter-spacing: 5px; }
+            .start-btn { font-size: 1.8rem; padding: 10px 40px; }
+        }
+    </style>
+</head>
+<body class="theme-war">
+
+    <!-- 0. INTRO SCREEN -->
+    <div id="intro-screen">
+        <div class="battlefield-bg"></div>
+        <div class="intro-text-container">
+            <div class="intro-sub">運籌帷幄。決勝千里</div>
+            <h1 class="intro-main" data-text="三國の爭霸天下">三國の爭霸天下</h1>
+        </div>
+        <button class="start-btn" onclick="enterGame()">四處征伐</button>
+    </div>
+
+    <!-- KOI FISH LAYER (Dynamic SVG via JS) -->
+    <div id="fish-layer"></div>
+
+    <!-- Header -->
+    <div id="game-header">
+        <div class="player-badge" id="p1-badge">
+            <span id="p1-name">P1</span>
+            <span class="army-info" id="p1-army">?</span>
+            <div class="order-badge" id="p1-order"></div>
+        </div>
+        <div class="player-badge" id="p2-badge">
+            <span id="p2-name">P2</span>
+            <span class="army-info" id="p2-army">?</span>
+            <div class="order-badge" id="p2-order"></div>
+        </div>
+        <div class="player-badge" id="p3-badge">
+            <span id="p3-name">P3</span>
+            <span class="army-info" id="p3-army">?</span>
+            <div class="order-badge" id="p3-order"></div>
+        </div>
+        <!-- Menu Button -->
+        <button class="header-btn" onclick="showInGameMenu()">軍令</button>
+    </div>
+
+    <!-- Board -->
+    <div id="board-container">
+        <div id="board"></div>
+    </div>
+
+    <!-- Logs -->
+    <div id="game-log"></div>
+
+    <!-- 1. Mode (War Theme) -->
+    <div id="mode-overlay" class="overlay hidden">
+        <div class="modal">
+            <h2>選擇戰役模式</h2>
+            <div class="diff-select">
+                <label for="difficulty">敵軍智謀等級</label>
+                <select id="difficulty">
+                    <option value="LV1">入門 (散兵游勇)</option>
+                    <option value="LV2">初級 (普通士兵)</option>
+                    <option value="LV3" selected>中級 (正規軍)</option>
+                    <option value="LV4">高級 (精銳部隊)</option>
+                    <option value="LV5">修羅 (臥龍鳳雛)</option>
+                </select>
+            </div>
+            <div style="display:flex; flex-direction:column;">
+                <button class="menu-btn" onclick="startSetup(1)">單騎救主 (1人)</button>
+                <button class="menu-btn" onclick="startSetup(2)">赤壁之戰 (2人)</button>
+                <button class="menu-btn" onclick="startSetup(3)">三國鼎立 (3人)</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. Country -->
+    <div id="country-overlay" class="overlay hidden">
+        <div class="modal">
+            <h3 id="country-title">主公請選擇勢力</h3>
+            <div class="faction-grid">
+                <button class="faction-btn" onclick="selectCountry('SHU')" style="background:var(--shu-color); border-color:#27ae60;">
+                    <h4>蜀</h4><span>劉備</span>
+                </button>
+                <button class="faction-btn" onclick="selectCountry('WU')" style="background:var(--wu-color); border-color:#c0392b;">
+                    <h4>吳</h4><span>孫權</span>
+                </button>
+                <button class="faction-btn" onclick="selectCountry('WEI')" style="background:var(--wei-color); border-color:#2980b9;">
+                    <h4>魏</h4><span>曹操</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. Dice -->
+    <div id="dice-overlay" class="overlay hidden">
+        <div class="modal">
+            <h3>爭奪先攻權</h3>
+            <div id="dice-container"></div>
+            <p id="dice-status" style="min-height: 2em; font-weight:bold; color: #e67e22; margin:15px 0; line-height: 1.4;">...</p>
+            <button id="roll-btn" onclick="startRollingBatch()">擲骰子</button>
+        </div>
+    </div>
+
+    <!-- 4. In-Game Menu -->
+    <div id="menu-overlay" class="overlay hidden">
+        <div class="modal">
+            <h3>軍令狀</h3>
+            <button class="menu-btn" onclick="handleMenuOption('draw')">平分秋色 (平局)</button>
+            <button class="menu-btn" onclick="handleMenuOption('restart')">卷土重来 (再戰)</button>
+            <button class="menu-btn" onclick="handleMenuOption('quit')">後會有期 (退兵)</button>
+            <button class="header-btn" onclick="closeInGameMenu()" style="margin-top:10px;">返回戰場</button>
+        </div>
+    </div>
+
+    <!-- Game Over -->
+    <div id="gameover-overlay" class="overlay hidden">
+        <div class="modal">
+            <h2 id="winner-title" style="font-family:'Ma Shan Zheng'; font-size:2.5rem; color:#c0392b;">勝負已分</h2>
+            <p id="winner-desc" style="font-size:1.2rem; font-weight:bold;">...</p>
+            <button onclick="handleMenuOption('restart')" style="margin-top:20px; font-size:1.2rem; background:#2c3e50;">卷土重来</button>
+            <button onclick="handleMenuOption('quit')" style="margin-top:10px; font-size:1.2rem; background:#8b0000;">後會有期</button>
+        </div>
+    </div>
+
+<script>
+/* --- Sound Manager --- */
+const SoundManager = {
+    ctx: null, isPlaying: false,
+    init: function() {
+        if (this.ctx) return;
+        try { window.AudioContext = window.AudioContext || window.webkitAudioContext; this.ctx = new AudioContext(); } catch(e) {}
+    },
+    playTone: function(freq, type, duration, vol=0.1) {
+        if (!this.ctx) return;
+        const osc = this.ctx.createOscillator(); const gain = this.ctx.createGain();
+        osc.type = type; osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+        gain.gain.setValueAtTime(vol, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + duration);
+        osc.connect(gain); gain.connect(this.ctx.destination);
+        osc.start(); osc.stop(this.ctx.currentTime + duration);
+    },
+    playNoise: function(duration) {
+        if (!this.ctx) return;
+        const bufferSize = this.ctx.sampleRate * duration;
+        const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+        const noise = this.ctx.createBufferSource(); noise.buffer = buffer;
+        const gain = this.ctx.createGain();
+        gain.gain.setValueAtTime(0.1, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + duration);
+        noise.connect(gain); gain.connect(this.ctx.destination); noise.start();
+    },
+    playFlip: function() { this.playNoise(0.05); this.playTone(600, 'triangle', 0.05, 0.05); },
+    playMove: function() { this.playTone(150, 'square', 0.08, 0.1); },
+    playCapture: function() { this.playNoise(0.15); this.playTone(80, 'sawtooth', 0.2, 0.25); },
+    startBGM: function() { if (!this.ctx || this.isPlaying) return; this.isPlaying = true; this.drumLoop(); },
+    drumLoop: function() {
+        if (!this.isPlaying) return;
+        this.playTone(60, 'square', 0.3, 0.1);
+        setTimeout(() => { if(this.isPlaying) this.playTone(60, 'square', 0.2, 0.08); }, 1500);
+        setTimeout(() => this.drumLoop(), 3000);
+    }
+};
+
+/* --- Config --- */
+const BOARD_W = 9; const BOARD_H = 5; const TOTAL_CELLS = BOARD_W * BOARD_H;
+const COUNTRY_SHU = 'SHU'; const COUNTRY_WU = 'WU'; const COUNTRY_WEI = 'WEI';
+const GROUP_KING = 'G_KING'; const GROUP_RED = 'G_RED'; const GROUP_BLACK = 'G_BLACK';
+
+const TYPES = {
+    KING: { nameR: '帥', nameB: '將', val: 100 }, GUARD: { nameR: '仕', nameB: '士', val: 40 },
+    ELEPHANT: { nameR: '相', nameB: '象', val: 30 }, ROOK: { nameR: '俥', nameB: '車', val: 90 },
+    HORSE: { nameR: '傌', nameB: '馬', val: 50 }, CANNON: { nameR: '炮', nameB: '包', val: 60 },
+    PAWN: { nameR: '兵', nameB: '卒', val: 20 }
+};
+
+const DECK_COMPOSITION = [
+    { type: 'KING', color: 'r', group: GROUP_KING }, { type: 'KING', color: 'b', group: GROUP_KING },
+    { type: 'PAWN', color: 'r', group: GROUP_KING }, { type: 'PAWN', color: 'r', group: GROUP_KING }, { type: 'PAWN', color: 'r', group: GROUP_KING }, { type: 'PAWN', color: 'r', group: GROUP_KING }, { type: 'PAWN', color: 'r', group: GROUP_KING },
+    { type: 'PAWN', color: 'b', group: GROUP_KING }, { type: 'PAWN', color: 'b', group: GROUP_KING }, { type: 'PAWN', color: 'b', group: GROUP_KING }, { type: 'PAWN', color: 'b', group: GROUP_KING }, { type: 'PAWN', color: 'b', group: GROUP_KING },
+    { type: 'GUARD', color: 'r', group: GROUP_RED }, { type: 'GUARD', color: 'r', group: GROUP_RED },
+    { type: 'ELEPHANT', color: 'r', group: GROUP_RED }, { type: 'ELEPHANT', color: 'r', group: GROUP_RED },
+    { type: 'ROOK', color: 'r', group: GROUP_RED }, { type: 'ROOK', color: 'r', group: GROUP_RED },
+    { type: 'HORSE', color: 'r', group: GROUP_RED }, { type: 'HORSE', color: 'r', group: GROUP_RED },
+    { type: 'CANNON', color: 'r', group: GROUP_RED }, { type: 'CANNON', color: 'r', group: GROUP_RED },
+    { type: 'GUARD', color: 'b', group: GROUP_BLACK }, { type: 'GUARD', color: 'b', group: GROUP_BLACK },
+    { type: 'ELEPHANT', color: 'b', group: GROUP_BLACK }, { type: 'ELEPHANT', color: 'b', group: GROUP_BLACK },
+    { type: 'ROOK', color: 'b', group: GROUP_BLACK }, { type: 'ROOK', color: 'b', group: GROUP_BLACK },
+    { type: 'HORSE', color: 'b', group: GROUP_BLACK }, { type: 'HORSE', color: 'b', group: GROUP_BLACK },
+    { type: 'CANNON', color: 'b', group: GROUP_BLACK }, { type: 'CANNON', color: 'b', group: GROUP_BLACK },
+];
+
+let gameState = {
+    board: [], players: [], turnQueue: [], turnPtr: 0, selectedIdx: -1, validMoves: [], gameOver: false,
+    lastActionIdx: -1, isAnimating: false,
+    setup: { totalHumans: 0, currentPicker: 0, difficulty: 'LV3' },
+    diceState: { candidates: [], resolvedOrder: [], rolling: false }
+};
+
+/* --- Intro --- */
+function createEmbers() {
+    const screen = document.getElementById('intro-screen');
+    for(let i=0; i<40; i++) {
+        const ember = document.createElement('div');
+        ember.className = 'ember';
+        ember.style.left = Math.random() * 100 + '%';
+        ember.style.animationDuration = (3 + Math.random() * 4) + 's';
+        ember.style.animationDelay = Math.random() * 5 + 's';
+        screen.appendChild(ember);
+    }
+}
+createEmbers();
+
+function enterGame() {
+    SoundManager.init(); SoundManager.startBGM();
+    const intro = document.getElementById('intro-screen');
+    intro.style.transition = 'opacity 1s';
+    intro.style.opacity = '0';
+    setTimeout(() => {
+        intro.style.display = 'none';
+        document.getElementById('mode-overlay').classList.remove('hidden');
+    }, 1000);
+}
+
+/* --- Dynamic Koi Generation --- */
+function getKoiSVG(type, uid) {
+    // Basic body gradient & colors based on Type
+    let defs = '';
+    let patterns = '';
+    
+    // Common Filters
+    const filterId = `blur-${uid}`;
+    defs += `<filter id="${filterId}"><feGaussianBlur stdDeviation="0.8" /></filter>`;
+    
+    // Body Gradient
+    const bodyGradId = `bodyGrad-${uid}`;
+    let c1, c2;
+    
+    if (type === 'OGON') { // Gold
+        c1 = '#ffd700'; c2 = '#e6ac00';
+    } else { // White base (Kohaku, Sanke, Tancho)
+        c1 = '#fffaf0'; c2 = '#e6e6e6';
+    }
+    
+    defs += `<radialGradient id="${bodyGradId}" cx="40%" cy="50%" r="50%">
+                <stop offset="0%" stop-color="${c1}"/>
+                <stop offset="100%" stop-color="${c2}"/>
+             </radialGradient>`;
+
+    // Patterns
+    if (type === 'KOHAKU' || type === 'SANKE') {
+        // Random Red Spots
+        patterns += `<circle cx="170" cy="50" r="${10 + Math.random()*5}" fill="#d32f2f" opacity="0.8" filter="url(#${filterId})"/>`;
+        patterns += `<ellipse cx="100" cy="50" rx="${15 + Math.random()*10}" ry="${10 + Math.random()*5}" fill="#d32f2f" opacity="0.8" filter="url(#${filterId})"/>`;
+        patterns += `<circle cx="40" cy="50" r="${8 + Math.random()*4}" fill="#d32f2f" opacity="0.8" filter="url(#${filterId})"/>`;
+    }
+    
+    if (type === 'SANKE') {
+        // Add Black Spots
+        patterns += `<circle cx="${120 + Math.random()*20}" cy="${35 + Math.random()*10}" r="${4 + Math.random()*3}" fill="#111" opacity="0.7" filter="url(#${filterId})"/>`;
+        patterns += `<circle cx="${70 + Math.random()*20}" cy="${60 + Math.random()*10}" r="${3 + Math.random()*3}" fill="#111" opacity="0.7" filter="url(#${filterId})"/>`;
+    }
+    
+    if (type === 'TANCHO') {
+        // Red spot on head only
+        patterns += `<circle cx="185" cy="50" r="12" fill="#d32f2f" opacity="0.9" filter="url(#${filterId})"/>`;
+    }
+
+    return `
+    <svg width="200" height="100" viewBox="0 0 200 100" overflow="visible">
+        <defs>${defs}</defs>
+        <g class="koi-body-group">
+            <!-- Tail (Integrated) -->
+            <path class="koi-tail" d="M30,50 Q0,20 -20,30 Q10,50 -20,70 Q0,80 30,50" 
+                  fill="rgba(255,255,255,0.7)" stroke="#ccc" stroke-width="0.5" transform-origin="30 50" />
+            <!-- Fins -->
+            <path class="koi-fin-l" d="M120,30 Q100,-10 70,10 Q100,20 120,30" 
+                  fill="rgba(255,255,255,0.6)" stroke="#ccc" stroke-width="0.5" transform-origin="120 30" />
+            <path class="koi-fin-r" d="M120,70 Q100,110 70,90 Q100,80 120,70" 
+                  fill="rgba(255,255,255,0.6)" stroke="#ccc" stroke-width="0.5" transform-origin="120 70" />
+            <!-- Body (Sharper Head) -->
+            <path d="M205,50 Q160,15 30,40 L30,60 Q160,85 205,50 Z" 
+                  fill="url(#${bodyGradId})" stroke="#ccc" stroke-width="0.5" />
+            <!-- Patterns -->
+            ${patterns}
+            <!-- Eyes (Forward) -->
+            <circle cx="198" cy="40" r="2.5" fill="white"/> <circle cx="199" cy="40" r="1" fill="black"/>
+            <circle cx="198" cy="60" r="2.5" fill="white"/> <circle cx="199" cy="60" r="1" fill="black"/>
+        </g>
+    </svg>`;
+}
+
+function spawnKoi() {
+    const layer = document.getElementById('fish-layer');
+    if (!layer || document.body.classList.contains('theme-war')) return;
+
+    const div = document.createElement('div');
+    div.className = 'koi-unit';
+    
+    // Pick Type
+    const types = ['KOHAKU', 'SANKE', 'OGON', 'TANCHO'];
+    const type = types[Math.floor(Math.random() * types.length)];
+    const uid = Math.floor(Math.random() * 10000);
+    
+    div.innerHTML = getKoiSVG(type, uid);
+    
+    // Position Logic
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    const offset = 250;
+    
+    const side = Math.floor(Math.random() * 4); // 0:Top, 1:Right, 2:Bottom, 3:Left
+    let startX, startY, endX, endY;
+    
+    if (side === 0) { startX = Math.random()*w; startY = -offset; endX = Math.random()*w; endY = h+offset; }
+    else if (side === 1) { startX = w+offset; startY = Math.random()*h; endX = -offset; endY = Math.random()*h; }
+    else if (side === 2) { startX = Math.random()*w; startY = h+offset; endX = Math.random()*w; endY = -offset; }
+    else { startX = -offset; startY = Math.random()*h; endX = w+offset; endY = Math.random()*h; }
+    
+    const dx = endX - startX;
+    const dy = endY - startY;
+    let angle = Math.atan2(dy, dx) * 180 / Math.PI;
+    // No offset needed for new SVG orientation (0 deg = Right)
+    
+    div.style.left = startX + 'px';
+    div.style.top = startY + 'px';
+    const scale = 0.6 + Math.random() * 0.6;
+    div.style.transform = `rotate(${angle}deg) scale(${scale})`;
+    
+    layer.appendChild(div);
+    
+    // Animate
+    const duration = 15 + Math.random() * 15;
+    
+    // Force reflow
+    void div.offsetWidth;
+    
+    div.style.transition = `left ${duration}s linear, top ${duration}s linear`;
+    div.style.left = endX + 'px';
+    div.style.top = endY + 'px';
+    
+    // Cleanup
+    setTimeout(() => { if(div.parentNode) div.parentNode.removeChild(div); }, duration * 1000);
+    
+    // Next Spawn
+    setTimeout(spawnKoi, 3000 + Math.random() * 5000);
+}
+
+/* --- Setup --- */
+function startSetup(humans) {
+    document.body.classList.remove('theme-war');
+    document.body.classList.add('theme-peace');
+    document.getElementById('mode-overlay').classList.add('hidden');
+    
+    spawnKoi(); // Start the loop
+    
+    gameState.setup.totalHumans = humans;
+    gameState.setup.difficulty = document.getElementById('difficulty').value;
+    gameState.players = [
+        { id: 0, name: 'P1', type: 'HUMAN', country: null, army: null, colorVar: '' },
+        { id: 1, name: 'P2', type: humans >= 2 ? 'HUMAN' : 'AI', country: null, army: null, colorVar: '' },
+        { id: 2, name: 'P3', type: humans >= 3 ? 'HUMAN' : 'AI', country: null, army: null, colorVar: '' }
+    ];
+    if (humans === 1) {
+        gameState.players[0].name = "主公";
+        gameState.players[1].name = `電腦A`;
+        gameState.players[2].name = `電腦B`;
+    }
+    gameState.setup.currentPicker = 0;
+    showNextPicker();
+}
+
+function showNextPicker() {
+    const taken = gameState.players.map(pl => pl.country).filter(c => c);
+    const avail = [COUNTRY_SHU, COUNTRY_WU, COUNTRY_WEI].filter(c => !taken.includes(c));
+    
+    if (gameState.setup.currentPicker >= 3) { finishSetup(); return; }
+
+    // AUTO-ASSIGN if only 1 left
+    if (avail.length === 1) {
+        selectCountryLogic(avail[0]);
+        return;
+    }
+
+    const p = gameState.players[gameState.setup.currentPicker];
+    if (p.type === 'HUMAN') {
+        const overlay = document.getElementById('country-overlay');
+        overlay.classList.remove('hidden');
+        document.getElementById('country-title').innerText = `${p.name} 請選擇勢力`;
+        updateCountryButtons();
+    } else {
+        selectCountryLogic(avail[Math.floor(Math.random() * avail.length)]);
+    }
+}
+
+function updateCountryButtons() {
+    const taken = gameState.players.map(p => p.country).filter(c => c);
+    const btns = document.querySelectorAll('.faction-btn');
+    const countries = [COUNTRY_SHU, COUNTRY_WU, COUNTRY_WEI];
+    btns.forEach((btn, i) => {
+        if (taken.includes(countries[i])) { btn.disabled = true; btn.style.opacity = '0.3'; }
+        else { btn.disabled = false; btn.style.opacity = '1'; }
+    });
+}
+
+function selectCountry(c) {
+    SoundManager.playMove();
+    selectCountryLogic(c);
+    document.getElementById('country-overlay').classList.add('hidden');
+}
+
+function selectCountryLogic(country) {
+    const p = gameState.players[gameState.setup.currentPicker];
+    p.country = country;
+    if (country === COUNTRY_SHU) { p.colorVar = '--shu-color'; p.name += "(蜀)"; }
+    if (country === COUNTRY_WU)  { p.colorVar = '--wu-color';  p.name += "(吳)"; }
+    if (country === COUNTRY_WEI) { p.colorVar = '--wei-color'; p.name += "(魏)"; }
+    gameState.setup.currentPicker++;
+    setTimeout(showNextPicker, 300);
+}
+
+function finishSetup() { updateHeader(); initDicePhase(); }
+
+/* --- Dice --- */
+function initDicePhase() {
+    document.getElementById('dice-overlay').classList.remove('hidden');
+    gameState.diceState.candidates = [0, 1, 2];
+    gameState.diceState.resolvedOrder = [null, null, null]; 
+    updateDiceUI("準備擲骰決定順序...", "擲骰子");
+}
+
+function updateDiceUI(statusMsg, btnText) {
+    const container = document.getElementById('dice-container'); container.innerHTML = '';
+    gameState.diceState.candidates.forEach(pIdx => {
+        const p = gameState.players[pIdx];
+        const wrapper = document.createElement('div'); wrapper.className = 'dice-wrapper';
+        const d = document.createElement('div'); d.className = 'dice'; d.id = `dice-p${pIdx}`;
+        d.innerText = p.diceVal !== undefined ? p.diceVal : '-';
+        d.style.color = `var(${p.colorVar})`; d.style.borderColor = `var(${p.colorVar})`;
+        const label = document.createElement('span'); label.className = 'dice-label'; label.innerText = p.name;
+        wrapper.appendChild(d); wrapper.appendChild(label); container.appendChild(wrapper);
+    });
+    document.getElementById('dice-status').innerText = statusMsg;
+    const btn = document.getElementById('roll-btn'); btn.style.display = 'inline-block'; btn.innerText = btnText;
+}
+
+function startRollingBatch() {
+    SoundManager.playNoise(0.1);
+    document.getElementById('roll-btn').style.display = 'none';
+    document.getElementById('dice-status').innerText = "擲骰中...";
+    let rolls = 0;
+    const interval = setInterval(() => {
+        gameState.diceState.candidates.forEach(pIdx => {
+            const val = Math.floor(Math.random() * 6) + 1;
+            document.getElementById(`dice-p${pIdx}`).innerText = val;
+            gameState.players[pIdx].diceVal = val;
+        });
+        rolls++;
+        if (rolls > 15) { clearInterval(interval); evaluateDiceRound(); }
+    }, 100);
+}
+
+function evaluateDiceRound() {
+    const candidates = gameState.diceState.candidates;
+    candidates.sort((a, b) => gameState.players[b].diceVal - gameState.players[a].diceVal);
+    const results = candidates.map(idx => ({ id: idx, val: gameState.players[idx].diceVal }));
+    let emptySlots = 0;
+    gameState.diceState.resolvedOrder.forEach(x => { if(x === null) emptySlots++; });
+    
+    if (emptySlots === 3) {
+        const v0 = results[0].val; const v1 = results[1].val; const v2 = results[2].val;
+        if (v0 > v1 && v1 > v2) finalizeOrder([results[0].id, results[1].id, results[2].id]);
+        else if (v0 === v1 && v1 === v2) showReRoll("三家點數相同，全部重擲！", [results[0].id, results[1].id, results[2].id]);
+        else if (v0 === v1 && v1 > v2) {
+            gameState.diceState.resolvedOrder[2] = results[2].id;
+            showReRoll(`${gameState.players[results[2].id].name} 確定第三順位。\n前兩名重擲！`, [results[0].id, results[1].id]);
+        } else if (v0 > v1 && v1 === v2) {
+            gameState.diceState.resolvedOrder[0] = results[0].id;
+            showReRoll(`${gameState.players[results[0].id].name} 確定先攻。\n後兩名重擲！`, [results[1].id, results[2].id]);
+        }
+    } else if (emptySlots === 2) {
+        const firstEmpty = gameState.diceState.resolvedOrder.indexOf(null);
+        const v0 = results[0].val; const v1 = results[1].val;
+        if (v0 > v1) {
+            gameState.diceState.resolvedOrder[firstEmpty] = results[0].id;
+            gameState.diceState.resolvedOrder[firstEmpty+1] = results[1].id;
+            finalizeOrder(gameState.diceState.resolvedOrder);
+        } else showReRoll("點數依然相同，繼續重擲！", [results[0].id, results[1].id]);
+    }
+}
+
+function showReRoll(msg, nextCandidates) {
+    gameState.diceState.candidates = nextCandidates;
+    setTimeout(() => { updateDiceUI(msg, "重擲"); }, 1500);
+}
+
+function finalizeOrder(finalArr) {
+    gameState.turnQueue = finalArr; gameState.turnPtr = 0;
+    const p1 = gameState.players[finalArr[0]]; const p2 = gameState.players[finalArr[1]]; const p3 = gameState.players[finalArr[2]];
+    const statusEl = document.getElementById('dice-status');
+    statusEl.innerHTML = `順位確定！<br>1. ${p1.name} <br>2. ${p2.name} <br>3. ${p3.name}`;
+    statusEl.style.color = '#27ae60';
+    document.getElementById('roll-btn').style.display = 'none';
+    finalArr.forEach((pid, idx) => {
+        const badge = document.getElementById(`p${pid+1}-order`);
+        badge.innerText = idx + 1; badge.style.display = 'flex';
+    });
+    setTimeout(() => {
+        document.getElementById('dice-overlay').classList.add('hidden');
+        initBoard();
+        log(`=== 遊戲開始 ===`);
+        log(`行動順序：${p1.name} -> ${p2.name} -> ${p3.name}`);
+        checkAiTurn();
+    }, 3000);
+}
+
+/* --- Menu Logic --- */
+function showInGameMenu() {
+    document.getElementById('menu-overlay').classList.remove('hidden');
+}
+function closeInGameMenu() {
+    document.getElementById('menu-overlay').classList.add('hidden');
+}
+function handleMenuOption(type) {
+    document.getElementById('menu-overlay').classList.add('hidden');
+    document.getElementById('gameover-overlay').classList.add('hidden');
+    if (type === 'draw') {
+        endGame("平分秋色 - 握手言和");
+    } else if (type === 'restart') {
+        document.getElementById('board').innerHTML = '';
+        document.getElementById('game-log').innerHTML = '';
+        startSetup(gameState.setup.totalHumans);
+    } else if (type === 'quit') {
+        location.reload(); 
+    }
+}
+
+/* --- Board --- */
+function initBoard() {
+    gameState.board = new Array(TOTAL_CELLS).fill(null);
+    let deck = [...DECK_COMPOSITION];
+    for (let i = deck.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [deck[i], deck[j]] = [deck[j], deck[i]];
+    }
+    let deckIdx = 0;
+    const place = (x, y) => { if (deckIdx < deck.length) gameState.board[y*BOARD_W+x] = { ...deck[deckIdx++], revealed: false }; };
+    for(let y=0; y<2; y++) for(let x=0; x<4; x++) place(x, y);
+    for(let y=0; y<2; y++) for(let x=5; x<9; x++) place(x, y);
+    for(let y=3; y<5; y++) for(let x=0; x<4; x++) place(x, y);
+    for(let y=3; y<5; y++) for(let x=5; x<9; x++) place(x, y);
+    
+    document.getElementById('game-header').classList.add('visible');
+    document.getElementById('board-container').classList.add('visible');
+    document.getElementById('game-log').classList.add('visible');
+    renderBoard(); updateHeader();
+}
+
+function renderBoard() {
+    const boardEl = document.getElementById('board'); boardEl.innerHTML = '';
+    gameState.board.forEach((piece, idx) => {
+        const cell = document.createElement('div'); cell.className = 'cell'; cell.onclick = () => handleCellClick(idx);
+        if (gameState.validMoves.includes(idx)) {
+            const hint = document.createElement('div'); hint.className = piece ? 'hint-kill' : 'hint-move'; cell.appendChild(hint);
+        }
+        if (piece) {
+            const pDiv = document.createElement('div'); pDiv.className = 'piece';
+            if (!piece.revealed) pDiv.classList.add('back');
+            else {
+                pDiv.classList.add(piece.color === 'r' ? 'text-red' : 'text-black');
+                pDiv.innerText = piece.color === 'r' ? TYPES[piece.type].nameR : TYPES[piece.type].nameB;
+                const owner = getOwner(piece.group);
+                if (owner) { pDiv.style.borderColor = `var(${owner.colorVar})`; pDiv.style.borderWidth = '4px'; }
+                else pDiv.style.borderColor = '#999';
+            }
+            if (idx === gameState.lastActionIdx) pDiv.classList.add('blinking');
+            if (gameState.selectedIdx === idx) { pDiv.classList.add('selected'); pDiv.classList.remove('blinking'); }
+            cell.appendChild(pDiv);
+        }
+        boardEl.appendChild(cell);
+    });
+}
+
+function getOwner(group) { return gameState.players.find(p => p.army === group); }
+function getCurrentPlayer() { 
+    if (!gameState.turnQueue || gameState.turnQueue.length === 0) return null;
+    return gameState.players[gameState.turnQueue[gameState.turnPtr]]; 
+}
+
+function updateHeader() {
+    gameState.players.forEach((p, i) => {
+        const badge = document.getElementById(`p${i+1}-badge`);
+        document.getElementById(`p${i+1}-name`).innerText = p.name;
+        const armyTxt = document.getElementById(`p${i+1}-army`);
+        if (p.army) {
+            if (p.army === GROUP_KING) armyTxt.innerText = "帥將兵卒";
+            if (p.army === GROUP_RED) armyTxt.innerText = "紅仕相俥傌炮";
+            if (p.army === GROUP_BLACK) armyTxt.innerText = "黑士象車馬包";
+        } else armyTxt.innerText = "兵權未定";
+        if (p.colorVar) {
+            badge.style.borderColor = `var(${p.colorVar})`;
+            document.getElementById(`p${i+1}-name`).style.color = `var(${p.colorVar})`;
+        }
+        const currentP = getCurrentPlayer();
+        if (currentP && currentP.id === p.id) badge.classList.add('active');
+        else badge.classList.remove('active');
+        if (p.army && isEliminated(p)) { badge.style.opacity = "0.3"; armyTxt.innerText = "已滅亡"; }
+    });
+}
+
+/* --- Gameplay --- */
+function handleCellClick(idx) {
+    if (gameState.gameOver || gameState.isAnimating) return; 
+    const player = getCurrentPlayer();
+    if (!player || player.type === 'AI') return;
+    const piece = gameState.board[idx];
+    if (gameState.selectedIdx !== -1 && gameState.validMoves.includes(idx)) { executeMove(gameState.selectedIdx, idx); return; }
+    if (piece && piece.revealed && piece.group === player.army) {
+        if (gameState.selectedIdx === idx) { gameState.selectedIdx = -1; gameState.validMoves = []; }
+        else { SoundManager.playMove(); gameState.selectedIdx = idx; gameState.validMoves = calculateMoves(idx); }
+        renderBoard(); return;
+    }
+    if (piece && !piece.revealed) { gameState.selectedIdx = -1; gameState.validMoves = []; executeFlip(idx); return; }
+    gameState.selectedIdx = -1; gameState.validMoves = []; renderBoard();
+}
+
+function executeFlip(idx) {
+    const piece = gameState.board[idx]; if (!piece) return;
+    SoundManager.playFlip();
+    piece.revealed = true; gameState.lastActionIdx = idx;
+    const player = getCurrentPlayer();
+    log(`${player.name} 翻出了：${getPieceName(piece)}`);
+    if (!player.army) {
+        const owner = getOwner(piece.group);
+        if (!owner) { player.army = piece.group; log(`>>> ${player.name} 獲得指揮權！`); checkAutoAssign(); }
+        else log(`(此棋屬於 ${owner.name})`);
+    }
+    finishTurn();
+}
+
+function executeMove(from, to) {
+    const p = gameState.board[from]; const t = gameState.board[to];
+    if (!p) { renderBoard(); return; }
+    gameState.isAnimating = true;
+    if (t) SoundManager.playCapture(); else SoundManager.playMove();
+    
+    const cells = document.querySelectorAll('.cell');
+    const fromCell = cells[from]; const toCell = cells[to];
+    const fromPieceEl = fromCell.querySelector('.piece'); const toPieceEl = toCell.querySelector('.piece');
+    const dx = toCell.offsetLeft - fromCell.offsetLeft; const dy = toCell.offsetTop - fromCell.offsetTop;
+    fromPieceEl.style.transition = "transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1)";
+    fromPieceEl.style.transform = `translate(${dx}px, ${dy}px)`;
+    fromPieceEl.style.zIndex = 100; 
+    if (t && toPieceEl) toPieceEl.classList.add('dying');
+    
+    setTimeout(() => {
+        let msg = t ? `吃掉了 ${getPieceName(t)}` : "移動";
+        log(`${getCurrentPlayer().name} 用 ${getPieceName(p)} ${msg}`);
+        gameState.board[to] = p; gameState.board[from] = null; gameState.lastActionIdx = to;
+        gameState.isAnimating = false; finishTurn();
+    }, t ? 750 : 400);
+}
+
+function calculateMoves(idx, activeArmy = null) {
+    const piece = gameState.board[idx]; if (!piece) return [];
+    const myArmy = activeArmy || getCurrentPlayer().army;
+    const moves = []; const cx = idx % BOARD_W, cy = Math.floor(idx / BOARD_W);
+    const checkDest = (tx, ty) => {
+        if (tx < 0 || tx >= BOARD_W || ty < 0 || ty >= BOARD_H) return false;
+        const tidx = ty * BOARD_W + tx; const target = gameState.board[tidx];
+        if (!target) { moves.push(tidx); return false; }
+        if (!target.revealed) return true;
+        if (target.group === myArmy) return true;
+        moves.push(tidx); return true;
+    };
+    if (piece.type === 'PAWN') [[0,1],[0,-1],[1,0],[-1,0]].forEach(([dx, dy]) => checkDest(cx+dx, cy+dy));
+    else if (piece.type === 'GUARD') [[1,1],[1,-1],[-1,1],[-1,-1]].forEach(([dx, dy]) => checkDest(cx+dx, cy+dy));
+    else if (piece.type === 'ELEPHANT') [[2,2],[2,-2],[-2,2],[-2,-2]].forEach(([dx, dy]) => checkDest(cx+dx, cy+dy));
+    else if (piece.type === 'HORSE') [[-1,-2], [1,-2], [-1,2], [1,2], [-2,-1], [-2,1], [2,-1], [2,1]].forEach(([dx, dy]) => checkDest(cx+dx, cy+dy));
+    else if (piece.type === 'ROOK' || piece.type === 'KING') {
+        [[0,1],[0,-1],[1,0],[-1,0]].forEach(([dx, dy]) => {
+            let x=cx+dx, y=cy+dy;
+            while (x>=0 && x<BOARD_W && y>=0 && y<BOARD_H) {
+                const tidx = y*BOARD_W+x, target = gameState.board[tidx];
+                if (!target) moves.push(tidx);
+                else { if (target.revealed && target.group !== myArmy) moves.push(tidx); break; }
+                x+=dx; y+=dy;
+            }
+        });
+    } else if (piece.type === 'CANNON') {
+        [[0,1],[0,-1],[1,0],[-1,0]].forEach(([dx, dy]) => {
+            let x=cx+dx, y=cy+dy, screen=false;
+            while (x>=0 && x<BOARD_W && y>=0 && y<BOARD_H) {
+                const tidx = y*BOARD_W+x, target = gameState.board[tidx];
+                if (!screen) { if (!target) moves.push(tidx); else screen=true; }
+                else if (target) { if (target.revealed && target.group !== myArmy) moves.push(tidx); break; }
+                x+=dx; y+=dy;
+            }
+        });
+    }
+    return moves;
+}
+
+function finishTurn() {
+    gameState.selectedIdx = -1; gameState.validMoves = [];
+    if (checkWin()) return;
+    let loops = 0;
+    do { gameState.turnPtr = (gameState.turnPtr + 1) % 3; loops++; } 
+    while (isEliminated(getCurrentPlayer()) && loops < 4);
+    renderBoard(); updateHeader(); checkAiTurn();
+}
+
+function checkAiTurn() {
+    const p = getCurrentPlayer();
+    if (p && p.type === 'AI' && !gameState.gameOver) setTimeout(aiMove, 1500);
+}
+
+function isEliminated(player) {
+    if (!player) return true; if (!player.army) return false;
+    return !gameState.board.some(p => p && p.group === player.army);
+}
+
+function checkAutoAssign() {
+    const unassignedP = gameState.players.filter(p => !p.army);
+    const assignedA = gameState.players.map(p => p.army).filter(a => a);
+    const freeA = [GROUP_KING, GROUP_RED, GROUP_BLACK].filter(a => !assignedA.includes(a));
+    if (unassignedP.length === 1 && freeA.length === 1) {
+        unassignedP[0].army = freeA[0]; log(`>>> 剩餘兵權 ${getArmyName(freeA[0])} 歸屬 ${unassignedP[0].name}`);
+    }
+}
+
+function checkWin() {
+    const active = gameState.players.filter(p => !isEliminated(p));
+    if (active.length === 1 && active[0].army) { endGame(`${active[0].name} 統一天下！`); return true; }
+    if (gameState.board.every(p => !p)) { endGame("平局！"); return true; }
+    return false;
+}
+
+function aiMove() {
+    const p = getCurrentPlayer(); if (!p) return; 
+    const diff = gameState.setup.difficulty; 
+    let actions = []; let myIndices = [], unknownIndices = [];
+    gameState.board.forEach((pc, i) => {
+        if (!pc) return;
+        if (!pc.revealed) unknownIndices.push(i);
+        else if (p.army && pc.group === p.army) myIndices.push(i);
+    });
+
+    if (p.army) {
+        myIndices.forEach(from => {
+            const moves = calculateMoves(from);
+            moves.forEach(to => {
+                const target = gameState.board[to];
+                let score = 0;
+                if (diff === 'LV1') { score = Math.random() * 10; if (target) score += 5; } 
+                else if (diff === 'LV2') { score = Math.random() * 10; if (target) score += 5; }
+                else {
+                    if (target) score = TYPES[target.type].val; else { score = 2; if (to % 9 === 4 || Math.floor(to / 9) === 2) score += 3; }
+                    if (diff === 'LV4' || diff === 'LV5') {
+                        const movingPiece = gameState.board[from]; const originalTo = gameState.board[to]; const myVal = TYPES[movingPiece.type].val;
+                        try {
+                            gameState.board[to] = movingPiece; gameState.board[from] = null;
+                            let threatScore = 0;
+                            for (let i = 0; i < TOTAL_CELLS; i++) {
+                                const enemy = gameState.board[i];
+                                if (enemy && enemy.revealed && enemy.group !== p.army) {
+                                    const enemyMoves = calculateMoves(i, enemy.group);
+                                    if (enemyMoves.includes(to)) {
+                                        threatScore += myVal; 
+                                        if (diff === 'LV5' && myVal >= 50) threatScore += 30; 
+                                        break; 
+                                    }
+                                }
+                            }
+                            score -= threatScore;
+                            if (diff === 'LV5' && target && (target.type === 'KING' || target.type === 'ROOK')) score += 40;
+                        } finally { gameState.board[from] = movingPiece; gameState.board[to] = originalTo; }
+                    }
+                }
+                actions.push({ type: 'MOVE', from, to, score });
+            });
+        });
+    }
+
+    unknownIndices.forEach(idx => {
+        let score = 0;
+        if (diff === 'LV1') score = Math.random() * 20;
+        else {
+            if (!p.army) score = 999;
+            else { score = 15; if (diff === 'LV4' || diff === 'LV5') score = 8; }
+        }
+        actions.push({ type: 'FLIP', idx, score });
+    });
+
+    if (actions.length === 0) { log(`${p.name} 無法行動`); finishTurn(); return; }
+    actions.forEach(a => {
+        const noise = (diff === 'LV1') ? (Math.random()*50 - 25) : (Math.random()*5 - 2.5);
+        a.finalScore = a.score + noise;
+    });
+    actions.sort((a,b) => b.finalScore - a.finalScore);
+    const act = actions[0];
+    if (act.type === 'FLIP') executeFlip(act.idx); else executeMove(act.from, act.to);
+}
+
+function getPieceName(p) { return p.color==='r' ? TYPES[p.type].nameR : TYPES[p.type].nameB; }
+function getArmyName(g) { return g===GROUP_KING?"帥將":g===GROUP_RED?"紅棋":"黑棋"; }
+function endGame(msg) { gameState.gameOver = true; document.getElementById('winner-desc').innerText = msg; document.getElementById('gameover-overlay').classList.remove('hidden'); }
+function log(msg) { const el = document.getElementById('game-log'); const d = document.createElement('div'); d.className = 'log-line'; d.innerText = msg; el.prepend(d); }
+</script>
+</body>
+</html>
