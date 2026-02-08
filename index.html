@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
-    <title>三國暗棋大戰 (天籟之音版)</title>
+    <title>三國暗棋大戰 (錦鯉問鼎版)</title>
     <!-- 引入書法字體 -->
     <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Long+Cang&family=Zhi+Mang+Xing&display=swap" rel="stylesheet">
     <style>
@@ -28,6 +28,9 @@
             transition: background 1s ease-in-out; 
         }
 
+        /* Utility Class */
+        .hidden { display: none !important; }
+
         /* =========================================
            THEME 1: WAR (Intro & Menu)
            ========================================= */
@@ -41,7 +44,7 @@
 
         #intro-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            z-index: 9999;
+            z-index: 9000;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
         }
 
@@ -77,7 +80,7 @@
         }
 
         .start-btn {
-            margin-top: 60px; font-family: 'Ma Shan Zheng', cursive; font-size: 2.5rem;
+            margin-top: 50px; font-family: 'Ma Shan Zheng', cursive; font-size: 2.5rem;
             padding: 15px 60px; background: transparent; color: #d4af37;
             border: 3px solid #d4af37; border-radius: 5px; cursor: pointer;
             text-shadow: 0 0 10px #d4af37; box-shadow: 0 0 20px rgba(212, 175, 55, 0.2), inset 0 0 20px rgba(0,0,0,0.5);
@@ -90,6 +93,14 @@
             transform: rotate(45deg); animation: shine 3s infinite linear; pointer-events: none;
         }
         @keyframes shine { 0% {transform: rotate(45deg) translateY(-100%);} 100% {transform: rotate(45deg) translateY(100%);} }
+
+        .ost-btn {
+            margin-top: 20px; font-family: 'BiauKai', serif; font-size: 1.2rem;
+            padding: 8px 30px; background: transparent; color: #888;
+            border: 1px solid #555; border-radius: 30px; cursor: pointer;
+            transition: all 0.3s; z-index: 10; letter-spacing: 2px;
+        }
+        .ost-btn:hover { color: #d4af37; border-color: #d4af37; background: rgba(212, 175, 55, 0.1); }
 
         /* =========================================
            THEME 2: PEACE (Game Board)
@@ -221,13 +232,11 @@
         .piece.back {
             background: radial-gradient(circle at 30% 30%, #5c4033, #3e2723); border: 2px solid #8d6e63; color: transparent;
         }
-        /* CHANGE: Back character to '鼎' with bigger, Qin/Han style */
         .piece.back::after { 
             content: '鼎'; 
             color: #daa520; /* Bronze Gold */
             font-size: 2.2rem; 
             text-shadow: 1px 1px 2px #000, 0 0 5px rgba(212, 175, 55, 0.3);
-            /* Ancient style font stack */
             font-family: "Zhi Mang Xing", "LiSu", "SimLi", "Ma Shan Zheng", cursive;
             font-weight: normal;
         }
@@ -249,23 +258,23 @@
         .overlay.hidden { display: none; }
         
         /* Modal Style */
-        #mode-overlay .modal {
+        #mode-overlay .modal, #ost-overlay .modal {
             background: linear-gradient(to bottom, #2c1e1e, #1a0a0a);
             border: 2px solid #8b4513;
             box-shadow: 0 0 30px rgba(255, 69, 0, 0.3), inset 0 0 20px rgba(0,0,0,0.8);
             color: #d4af37; width: 85%; max-width: 400px; padding: 30px; border-radius: 8px; text-align: center;
         }
-        #mode-overlay h2 { font-family: 'Ma Shan Zheng'; color: #ff4500; text-shadow: 0 0 10px rgba(255, 69, 0, 0.5); font-size: 2.2rem; }
+        #mode-overlay h2, #ost-overlay h2 { font-family: 'Ma Shan Zheng'; color: #ff4500; text-shadow: 0 0 10px rgba(255, 69, 0, 0.5); font-size: 2.2rem; }
         #mode-overlay label { color: #d4af37; }
         #mode-overlay select { background: #333; color: #fff; border: 1px solid #555; }
-        #mode-overlay .menu-btn {
+        #mode-overlay .menu-btn, #ost-overlay .menu-btn {
             background: linear-gradient(to bottom, #800000, #500000);
             border: 1px solid #ff4500; color: #fff;
             font-family: 'Ma Shan Zheng'; font-size: 1.5rem;
             margin: 10px 0; width: 100%; padding: 10px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.5);
         }
-        #mode-overlay .menu-btn:hover { background: linear-gradient(to bottom, #a00000, #700000); box-shadow: 0 0 15px rgba(255, 69, 0, 0.6); }
+        #mode-overlay .menu-btn:hover, #ost-overlay .menu-btn:hover { background: linear-gradient(to bottom, #a00000, #700000); box-shadow: 0 0 15px rgba(255, 69, 0, 0.6); }
 
         .modal { background: #fff; padding: 30px; border-radius: 12px; text-align: center; width: 85%; max-width: 400px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); border: 4px solid #34495e; }
         h3 { margin-top: 0; color: #2c3e50; font-family:'BiauKai'; font-size:1.8rem; }
@@ -291,6 +300,22 @@
         .diff-select { margin-bottom: 20px; text-align: left; padding: 10px; border: 1px solid #8b4513; border-radius: 5px; background: rgba(0,0,0,0.3); }
         .diff-select select { width: 100%; padding: 8px; margin-top: 5px; }
 
+        /* OST Track List */
+        #ost-list {
+            list-style: none; padding: 0; margin: 0;
+            max-height: 250px; overflow-y: auto;
+            text-align: left;
+            border: 1px solid #555; background: rgba(0,0,0,0.3);
+        }
+        #ost-list li {
+            padding: 10px; border-bottom: 1px solid #444;
+            cursor: pointer; transition: all 0.2s;
+            font-size: 1.1rem; font-family: "Microsoft JhengHei";
+        }
+        #ost-list li:hover { background: rgba(212, 175, 55, 0.2); color: #fff; }
+        #ost-list li.playing { color: #ff4500; font-weight: bold; background: rgba(0,0,0,0.5); }
+        #ost-list li .track-num { color: #888; font-size: 0.9rem; margin-right: 10px; }
+
         @media (max-width: 768px) {
             .intro-sub { font-size: 1.5rem; }
             .intro-main { font-size: 3rem; letter-spacing: 5px; }
@@ -300,15 +325,7 @@
 </head>
 <body class="theme-war">
 
-    <!-- Audio Placeholders (User can replace src) -->
-    <!-- War BGM (Intro) -->
-    <audio id="bgm-war" loop>
-        <source src="" type="audio/mpeg">
-    </audio>
-    <!-- Peace BGM (Game) -->
-    <audio id="bgm-peace" loop>
-        <source src="" type="audio/mpeg">
-    </audio>
+    <!-- Audio Placeholders (Dynamic via JS) -->
 
     <!-- 0. INTRO SCREEN -->
     <div id="intro-screen">
@@ -317,7 +334,8 @@
             <div class="intro-sub">運籌帷幄。決勝千里</div>
             <h1 class="intro-main" data-text="三國の爭霸天下">三國の爭霸天下</h1>
         </div>
-        <button class="start-btn" onclick="enterGame()">四處征伐</button>
+        <button class="start-btn" onclick="enterGame()">自立為王</button>
+        <button class="ost-btn" onclick="openOST()">三國棋 OST</button>
     </div>
 
     <!-- KOI FISH LAYER (Dynamic SVG via JS) -->
@@ -413,6 +431,17 @@
         </div>
     </div>
 
+    <!-- 5. OST Menu -->
+    <div id="ost-overlay" class="overlay hidden">
+        <div class="modal">
+            <h2>三國棋 原聲帶</h2>
+            <ul id="ost-list">
+                <!-- Tracks generated by JS -->
+            </ul>
+            <button class="menu-btn" onclick="closeOST()">返回大廳</button>
+        </div>
+    </div>
+
     <!-- Game Over -->
     <div id="gameover-overlay" class="overlay hidden">
         <div class="modal">
@@ -424,16 +453,49 @@
     </div>
 
 <script>
-/* --- SOUND MANAGER V2 (PROCEDURAL GENERATION + EXTERNAL FILE SUPPORT) --- */
-const SoundManager = {
-    ctx: null, 
-    masterGain: null,
-    convolver: null,
-    activeVoices: [],
-    droneOscs: [],
-    mode: 'WAR', // 'WAR' or 'PEACE'
-    isPlaying: false,
+/* --- CONFIG: MUSIC PLAYLISTS (MAPPED) --- */
+const BGM_PLAYLIST = {
+    INTRO: [
+        "https://raw.githubusercontent.com/wjy1976/sango-chess/main/1.Prelude%20Gathering%20Storms.mp3",
+        "https://raw.githubusercontent.com/wjy1976/sango-chess/main/3.Farewell%20The%20Heroes%E2%80%99%20Last%20Departure.mp3" 
+    ],
+    MENU:  [
+        "https://raw.githubusercontent.com/wjy1976/sango-chess/main/2.War%20Prep%20Iron-Clad%20Orders.mp3",
+        "https://raw.githubusercontent.com/wjy1976/sango-chess/main/4.March%20Lightning%20Strike%20Assault.mp3" 
+    ],
+    GAME:  [
+        "https://raw.githubusercontent.com/wjy1976/sango-chess/main/5.Ambush%20Encircled%20on%20All%20Sides.mp3",
+        "https://raw.githubusercontent.com/wjy1976/sango-chess/main/6.Triumph%20Return%20of%20the%20King.mp3",
+        "https://raw.githubusercontent.com/wjy1976/sango-chess/main/7.Dirge%20Besieged%20by%20Foes%20on%20Every%20Side.mp3",
+        "https://raw.githubusercontent.com/wjy1976/sango-chess/main/8.The%20Fall%20Retreat%20at%20Huarong%20Trail.mp3"
+    ],
+    END:   [
+        "https://raw.githubusercontent.com/wjy1976/sango-chess/main/9.The%20End%20Mutual%20Destruction.mp3"
+    ],
+    OST:   [         
+        "https://raw.githubusercontent.com/wjy1976/sango-chess/main/1.Prelude%20Gathering%20Storms.mp3",
+        "https://raw.githubusercontent.com/wjy1976/sango-chess/main/2.War%20Prep%20Iron-Clad%20Orders.mp3",
+        "https://raw.githubusercontent.com/wjy1976/sango-chess/main/3.Farewell%20The%20Heroes%E2%80%99%20Last%20Departure.mp3",
+        "https://raw.githubusercontent.com/wjy1976/sango-chess/main/4.March%20Lightning%20Strike%20Assault.mp3",
+        "https://raw.githubusercontent.com/wjy1976/sango-chess/main/5.Ambush%20Encircled%20on%20All%20Sides.mp3",
+        "https://raw.githubusercontent.com/wjy1976/sango-chess/main/6.Triumph%20Return%20of%20the%20King.mp3",
+        "https://raw.githubusercontent.com/wjy1976/sango-chess/main/7.Dirge%20Besieged%20by%20Foes%20on%20Every%20Side.mp3",
+        "https://raw.githubusercontent.com/wjy1976/sango-chess/main/8.The%20Fall%20Retreat%20at%20Huarong%20Trail.mp3",
+        "https://raw.githubusercontent.com/wjy1976/sango-chess/main/9.The%20End%20Mutual%20Destruction.mp3"
+    ]
+};
 
+const OST_TITLES = [
+    "序曲：烽火狼煙", "備戰：整軍待發", "辭行：壯士一去", "行軍：千里奔襲", 
+    "埋伏：十面埋伏", "凱旋：王者歸來", "悲歌：四面楚歌", "殘局：敗走華容", 
+    "尾聲：玉石俱焚"
+];
+
+/* --- SOUND MANAGER --- */
+const SoundManager = {
+    ctx: null, masterGain: null, convolver: null, activeVoices: [], droneOscs: [],
+    currentBgmAudio: null, mode: 'INTRO', isPlaying: false,
+    
     // Init
     init: function() {
         if (this.ctx) return;
@@ -442,229 +504,174 @@ const SoundManager = {
         this.masterGain = this.ctx.createGain();
         this.masterGain.gain.value = 0.5;
         this.masterGain.connect(this.ctx.destination);
-        
-        // Setup Reverb (Procedural Impulse)
         this.setupReverb();
     },
 
     setupReverb: function() {
-        const duration = 2;
-        const decay = 2;
-        const rate = this.ctx.sampleRate;
+        const duration = 2; const decay = 2; const rate = this.ctx.sampleRate;
         const length = rate * duration;
         const impulse = this.ctx.createBuffer(2, length, rate);
-        const impulseL = impulse.getChannelData(0);
-        const impulseR = impulse.getChannelData(1);
-
+        const impulseL = impulse.getChannelData(0); const impulseR = impulse.getChannelData(1);
         for (let i = 0; i < length; i++) {
-            const n = length - i;
-            // Simple exponential decay noise
-            const noise = (Math.random() * 2 - 1) * Math.pow(1 - i / length, decay);
-            impulseL[i] = noise;
-            impulseR[i] = noise;
+            const n = length - i; const noise = (Math.random() * 2 - 1) * Math.pow(1 - i / length, decay);
+            impulseL[i] = noise; impulseR[i] = noise;
         }
-
         this.convolver = this.ctx.createConvolver();
-        this.convolver.buffer = impulse;
-        this.convolver.connect(this.masterGain);
+        this.convolver.buffer = impulse; this.convolver.connect(this.masterGain);
     },
 
-    // --- PROCEDURAL GENERATORS ---
+    // --- BGM LOGIC ---
+    startBGM: function() {
+        this.isPlaying = true;
+        this.switchTheme('INTRO');
+    },
 
-    // 1. Play Tone (Simple SFX)
+    switchTheme: function(theme) {
+        if (!this.ctx) return;
+        this.stopAllDrones();
+        if (this.currentBgmAudio) { this.currentBgmAudio.pause(); this.currentBgmAudio = null; }
+        this.mode = theme; 
+        
+        const playlist = BGM_PLAYLIST[theme];
+        const validTracks = playlist.filter(url => url && url.trim() !== "");
+
+        if (validTracks.length > 0) {
+            this.playRandomTrack(validTracks);
+        } else {
+            // Fallback Procedural
+            if (theme === 'INTRO' || theme === 'MENU') this.startWarDrone();
+            else this.startPeaceDrone();
+        }
+    },
+
+    playRandomTrack: function(tracks) {
+        const url = tracks[Math.floor(Math.random() * tracks.length)];
+        const audio = new Audio(url);
+        audio.volume = 0.6;
+        audio.play().catch(e => console.log("Audio play blocked:", e));
+        this.currentBgmAudio = audio;
+        audio.onended = () => {
+            if (this.isPlaying && this.mode !== 'OST') {
+                 // Check if mode is still the same. If yes, play next.
+                 this.playRandomTrack(tracks);
+            }
+        };
+    },
+
+    // --- OST PLAYER LOGIC ---
+    playOSTTrack: function(index) {
+        if (!this.ctx) this.init();
+        
+        // Stop Everything
+        this.stopAllDrones();
+        if (this.currentBgmAudio) { this.currentBgmAudio.pause(); this.currentBgmAudio = null; }
+        
+        // UI Update
+        const listItems = document.querySelectorAll('#ost-list li');
+        listItems.forEach(li => li.classList.remove('playing'));
+        listItems[index].classList.add('playing');
+
+        const url = BGM_PLAYLIST.OST[index];
+        if (url && url.trim() !== "") {
+            const audio = new Audio(url);
+            audio.volume = 0.8;
+            audio.play();
+            this.currentBgmAudio = audio;
+        } else {
+            // Fake procedural demo for placeholder
+            this.playProceduralDemo(index);
+        }
+    },
+    
+    playProceduralDemo: function(index) {
+        const baseFreq = 200 + (index * 50);
+        this.startPeaceDrone(); 
+        this.playTone(baseFreq, 'sawtooth', 1, 0.2);
+    },
+
+    // --- PROCEDURAL GENERATORS (Fallback) ---
     playTone: function(freq, type, duration, vol=0.1) {
         if (!this.ctx) return;
-        const osc = this.ctx.createOscillator();
-        const gain = this.ctx.createGain();
-        osc.type = type;
-        osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+        const osc = this.ctx.createOscillator(); const gain = this.ctx.createGain();
+        osc.type = type; osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
         gain.gain.setValueAtTime(vol, this.ctx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + duration);
-        
-        osc.connect(gain);
-        gain.connect(this.masterGain);
-        osc.start();
-        osc.stop(this.ctx.currentTime + duration);
+        osc.connect(gain); gain.connect(this.masterGain);
+        osc.start(); osc.stop(this.ctx.currentTime + duration);
     },
-
-    // 2. Play Noise (SFX)
     playNoise: function(duration, vol=0.1) {
         if (!this.ctx) return;
         const bufferSize = this.ctx.sampleRate * duration;
         const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
         const data = buffer.getChannelData(0);
         for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
-
-        const noise = this.ctx.createBufferSource();
-        noise.buffer = buffer;
+        const noise = this.ctx.createBufferSource(); noise.buffer = buffer;
         const gain = this.ctx.createGain();
         gain.gain.setValueAtTime(vol, this.ctx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + duration);
-        
-        noise.connect(gain);
-        gain.connect(this.masterGain);
-        noise.start();
+        noise.connect(gain); gain.connect(this.masterGain); noise.start();
     },
-
-    // 3. Guqin/Guzheng Simulation (Pentatonic Pluck)
+    
     playGuqinNote: function() {
-        if (!this.ctx || this.mode !== 'PEACE') return;
-        
-        // Pentatonic Scale (C D E G A)
-        // Mid-High range for melody
+        if (!this.ctx || (this.mode !== 'GAME' && this.mode !== 'END' && this.mode !== 'OST') || this.currentBgmAudio) return; 
         const scale = [261.63, 293.66, 329.63, 392.00, 440.00, 523.25]; 
         const freq = scale[Math.floor(Math.random() * scale.length)];
-        
-        const osc = this.ctx.createOscillator();
-        const gain = this.ctx.createGain();
-        
-        // Triangle wave sounds softer, like a string
-        osc.type = 'triangle';
-        osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
-        
-        // Envelope: Fast attack, Long slow decay (Pluck style)
+        const osc = this.ctx.createOscillator(); const gain = this.ctx.createGain();
+        osc.type = 'triangle'; osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
         const now = this.ctx.currentTime;
-        gain.gain.setValueAtTime(0, now);
-        gain.gain.linearRampToValueAtTime(0.15, now + 0.05); // Pluck
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 3); // Ring out
-        
-        // Connect to Reverb for "Valley" feel
-        osc.connect(gain);
-        gain.connect(this.convolver); 
-        
-        osc.start();
-        osc.stop(now + 4);
-        
-        // Schedule next note randomly
+        gain.gain.setValueAtTime(0, now); gain.gain.linearRampToValueAtTime(0.15, now + 0.05);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 3);
+        osc.connect(gain); gain.connect(this.convolver); 
+        osc.start(); osc.stop(now + 4);
         setTimeout(() => this.playGuqinNote(), 2000 + Math.random() * 4000);
     },
 
-    // 4. War Drone (Low Frequency Tension)
     startWarDrone: function() {
-        // Deep Sawtooth with Lowpass Filter
-        const osc = this.ctx.createOscillator();
-        const gain = this.ctx.createGain();
+        const osc = this.ctx.createOscillator(); const gain = this.ctx.createGain();
         const filter = this.ctx.createBiquadFilter();
-        
-        osc.type = 'sawtooth';
-        osc.frequency.value = 55; // Low A
-        
-        filter.type = 'lowpass';
-        filter.frequency.value = 200; // Muffled
-        
+        osc.type = 'sawtooth'; osc.frequency.value = 55; 
+        filter.type = 'lowpass'; filter.frequency.value = 200; 
         gain.gain.value = 0.0;
-        
-        osc.connect(filter);
-        filter.connect(gain);
-        gain.connect(this.masterGain);
-        
+        osc.connect(filter); filter.connect(gain); gain.connect(this.masterGain);
         osc.start();
-        // Fade in
         gain.gain.linearRampToValueAtTime(0.15, this.ctx.currentTime + 2);
-        
         this.droneOscs.push({osc, gain});
-        
-        // Occasional deep drum
         this.warDrumLoop();
     },
-    
     warDrumLoop: function() {
-        if (!this.isPlaying || this.mode !== 'WAR') return;
-        // Deep Thud
+        if (!this.isPlaying || (this.mode !== 'INTRO' && this.mode !== 'MENU') || this.currentBgmAudio) return;
         this.playTone(60, 'square', 0.4, 0.2);
-        setTimeout(() => { if(this.mode === 'WAR') this.playTone(50, 'square', 0.5, 0.15); }, 2000); // Heartbeat style
+        setTimeout(() => { if((this.mode === 'INTRO' || this.mode === 'MENU') && !this.currentBgmAudio) this.playTone(50, 'square', 0.5, 0.15); }, 2000); 
         setTimeout(() => this.warDrumLoop(), 4000);
     },
-
-    // 5. Peace Drone (Ethereal Pad)
     startPeaceDrone: function() {
-        // Two Sine waves detuned slightly for "shimmering" water effect
-        const freqs = [196.00, 220.00]; // G3, A3
-        
+        const freqs = [196.00, 220.00]; 
         freqs.forEach(f => {
-            const osc = this.ctx.createOscillator();
-            const gain = this.ctx.createGain();
-            osc.type = 'sine';
-            osc.frequency.value = f;
-            gain.gain.value = 0;
-            
-            osc.connect(gain);
-            gain.connect(this.convolver); // Reverb makes it "Pad" like
+            const osc = this.ctx.createOscillator(); const gain = this.ctx.createGain();
+            osc.type = 'sine'; osc.frequency.value = f; gain.gain.value = 0;
+            osc.connect(gain); gain.connect(this.convolver); 
             osc.start();
-            
-            // Slow breath
             gain.gain.linearRampToValueAtTime(0.05, this.ctx.currentTime + 3);
-            
             this.droneOscs.push({osc, gain});
         });
-        
-        // Start Melody
         this.playGuqinNote();
     },
-
-    // --- CONTROLS ---
-
-    startBGM: function() {
-        this.isPlaying = true;
-        // Try external first? No, lets stick to procedural for consistency unless user edits HTML
-        // Check if user provided valid src in HTML audio tags
-        const extWar = document.getElementById('bgm-war');
-        const extPeace = document.getElementById('bgm-peace');
-        
-        if (extWar.src && extWar.src !== window.location.href) {
-            // User has custom file
-            extWar.play().catch(e=>console.log("Auto-play blocked"));
-        } else {
-            // Use Procedural
-            this.mode = 'WAR';
-            this.startWarDrone();
-        }
-    },
-
-    switchTheme: function(theme) {
-        if (!this.ctx) return;
-        this.stopAllDrones();
-        this.mode = theme; // 'WAR' or 'PEACE'
-        
-        // External File Check
-        const extWar = document.getElementById('bgm-war');
-        const extPeace = document.getElementById('bgm-peace');
-        
-        // Stop Externals
-        extWar.pause(); extWar.currentTime = 0;
-        extPeace.pause(); extPeace.currentTime = 0;
-
-        if (theme === 'PEACE') {
-             if (extPeace.src && extPeace.src !== window.location.href) {
-                 extPeace.play();
-             } else {
-                 this.startPeaceDrone();
-             }
-        } else {
-             if (extWar.src && extWar.src !== window.location.href) {
-                 extWar.play();
-             } else {
-                 this.startWarDrone();
-             }
-        }
-    },
-
     stopAllDrones: function() {
         this.droneOscs.forEach(o => {
-            try {
-                o.gain.gain.linearRampToValueAtTime(0, this.ctx.currentTime + 1);
-                o.osc.stop(this.ctx.currentTime + 1);
-            } catch(e){}
+            try { o.gain.gain.linearRampToValueAtTime(0, this.ctx.currentTime + 1); o.osc.stop(this.ctx.currentTime + 1); } catch(e){}
         });
         this.droneOscs = [];
     },
 
-    // --- SFX CALLS ---
-    playFlip: function() { this.playNoise(0.05, 0.1); this.playTone(600, 'triangle', 0.05, 0.1); },
-    playMove: function() { this.playTone(150, 'square', 0.08, 0.1); }, // Wood tap
+    // --- SFX ---
+    playFlip: function() { 
+        this.playNoise(0.05, 0.1); this.playTone(600, 'triangle', 0.05, 0.1); 
+    },
+    playMove: function() { 
+        this.playTone(150, 'square', 0.08, 0.1); 
+    }, 
     playCapture: function() { 
-        this.playNoise(0.15, 0.2); 
-        this.playTone(80, 'sawtooth', 0.2, 0.3); // Heavy slash
+        this.playNoise(0.15, 0.2); this.playTone(80, 'sawtooth', 0.2, 0.3); 
     }
 };
 
@@ -719,14 +726,38 @@ createEmbers();
 
 function enterGame() {
     SoundManager.init(); 
-    SoundManager.startBGM(); // Start War Ambience
+    SoundManager.switchTheme('MENU'); // Switch from INTRO to MENU
     const intro = document.getElementById('intro-screen');
     intro.style.transition = 'opacity 1s';
     intro.style.opacity = '0';
     setTimeout(() => {
-        intro.style.display = 'none';
+        intro.classList.add('hidden');
         document.getElementById('mode-overlay').classList.remove('hidden');
     }, 1000);
+}
+
+/* --- OST UI Logic --- */
+function openOST() {
+    const list = document.getElementById('ost-list');
+    list.innerHTML = '';
+    OST_TITLES.forEach((title, idx) => {
+        const li = document.createElement('li');
+        li.innerHTML = `<span class="track-num">${idx+1}.</span> ${title}`;
+        li.onclick = () => SoundManager.playOSTTrack(idx);
+        list.appendChild(li);
+    });
+    
+    document.getElementById('intro-screen').classList.add('hidden'); 
+    document.getElementById('ost-overlay').classList.remove('hidden');
+    
+    SoundManager.init();
+    SoundManager.mode = 'OST';
+}
+
+function closeOST() {
+    document.getElementById('ost-overlay').classList.add('hidden');
+    document.getElementById('intro-screen').classList.remove('hidden'); 
+    SoundManager.switchTheme('INTRO');
 }
 
 /* --- Dynamic Koi Generation --- */
@@ -803,7 +834,8 @@ function startSetup(humans) {
     document.body.classList.add('theme-peace');
     document.getElementById('mode-overlay').classList.add('hidden');
     
-    SoundManager.switchTheme('PEACE'); // Switch BGM
+    SoundManager.switchTheme('MENU'); // Still MENU during country selection? Or wait, MENU music was for selection.
+    // Let's keep MENU music until game actually starts (after dice)
     spawnKoi();
     
     gameState.setup.totalHumans = humans;
@@ -825,8 +857,15 @@ function startSetup(humans) {
 function showNextPicker() {
     const taken = gameState.players.map(pl => pl.country).filter(c => c);
     const avail = [COUNTRY_SHU, COUNTRY_WU, COUNTRY_WEI].filter(c => !taken.includes(c));
+    
     if (gameState.setup.currentPicker >= 3) { finishSetup(); return; }
-    if (avail.length === 1) { selectCountryLogic(avail[0]); return; }
+
+    // AUTO-ASSIGN if only 1 left
+    if (avail.length === 1) {
+        selectCountryLogic(avail[0]);
+        return;
+    }
+
     const p = gameState.players[gameState.setup.currentPicker];
     if (p.type === 'HUMAN') {
         const overlay = document.getElementById('country-overlay');
@@ -952,6 +991,7 @@ function finalizeOrder(finalArr) {
     });
     setTimeout(() => {
         document.getElementById('dice-overlay').classList.add('hidden');
+        SoundManager.switchTheme('GAME'); // Switch to Game Music
         initBoard();
         log(`=== 遊戲開始 ===`);
         log(`行動順序：${p1.name} -> ${p2.name} -> ${p3.name}`);
@@ -969,6 +1009,7 @@ function handleMenuOption(type) {
     else if (type === 'restart') {
         document.getElementById('board').innerHTML = '';
         document.getElementById('game-log').innerHTML = '';
+        SoundManager.switchTheme('MENU'); // Restart Music
         startSetup(gameState.setup.totalHumans);
     } else if (type === 'quit') { location.reload(); }
 }
@@ -1169,8 +1210,14 @@ function checkAutoAssign() {
 
 function checkWin() {
     const active = gameState.players.filter(p => !isEliminated(p));
-    if (active.length === 1 && active[0].army) { endGame(`${active[0].name} 統一天下！`); return true; }
-    if (gameState.board.every(p => !p)) { endGame("平局！"); return true; }
+    if (active.length === 1 && active[0].army) {
+        SoundManager.switchTheme('END');
+        endGame(`${active[0].name} 統一天下！`); return true; 
+    }
+    if (gameState.board.every(p => !p)) { 
+        SoundManager.switchTheme('END');
+        endGame("平局！"); return true; 
+    }
     return false;
 }
 
@@ -1194,25 +1241,43 @@ function aiMove() {
                 else if (diff === 'LV2') { score = Math.random() * 10; if (target) score += 5; }
                 else {
                     if (target) score = TYPES[target.type].val; else { score = 2; if (to % 9 === 4 || Math.floor(to / 9) === 2) score += 3; }
+                    
+                    // SMART LOGIC (LV4/LV5)
                     if (diff === 'LV4' || diff === 'LV5') {
                         const movingPiece = gameState.board[from]; const originalTo = gameState.board[to]; const myVal = TYPES[movingPiece.type].val;
+                        
                         try {
-                            gameState.board[to] = movingPiece; gameState.board[from] = null;
+                            // MOCK MOVE
+                            gameState.board[to] = movingPiece; 
+                            gameState.board[from] = null;
+                            
                             let threatScore = 0;
+                            
+                            // Check Safety: Scan all enemies
                             for (let i = 0; i < TOTAL_CELLS; i++) {
                                 const enemy = gameState.board[i];
                                 if (enemy && enemy.revealed && enemy.group !== p.army) {
+                                    // Can this enemy kill me at 'to'?
+                                    // Pass current board state to check hypothetical moves
                                     const enemyMoves = calculateMoves(i, gameState.board, enemy.group);
                                     if (enemyMoves.includes(to)) {
                                         threatScore += myVal; 
-                                        if (diff === 'LV5' && myVal >= 50) threatScore += 30; 
+                                        if (diff === 'LV5' && myVal >= 50) threatScore += 30; // Protect big pieces
                                         break; 
                                     }
                                 }
                             }
-                            score -= threatScore;
+                            
+                            score -= threatScore; // Subtract risk
+                            
+                            // Hunter Logic: Kill high value targets
                             if (diff === 'LV5' && target && (target.type === 'KING' || target.type === 'ROOK')) score += 40;
-                        } finally { gameState.board[from] = movingPiece; gameState.board[to] = originalTo; }
+                            
+                        } finally { 
+                            // RESTORE BOARD
+                            gameState.board[from] = movingPiece; 
+                            gameState.board[to] = originalTo; 
+                        }
                     }
                 }
                 actions.push({ type: 'MOVE', from, to, score });
@@ -1231,10 +1296,13 @@ function aiMove() {
     });
 
     if (actions.length === 0) { log(`${p.name} 無法行動`); finishTurn(); return; }
+    
+    // Add noise for variability
     actions.forEach(a => {
         const noise = (diff === 'LV1') ? (Math.random()*50 - 25) : (Math.random()*5 - 2.5);
         a.finalScore = a.score + noise;
     });
+    
     actions.sort((a,b) => b.finalScore - a.finalScore);
     const act = actions[0];
     if (act.type === 'FLIP') executeFlip(act.idx); else executeMove(act.from, act.to);
