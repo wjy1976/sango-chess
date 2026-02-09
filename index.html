@@ -13,15 +13,16 @@
             --bg-color: #dcdcdc;
             --board-bg: #cda676;
             --grid-line: #463325;
-            /* Country Colors - Defined for Glow Effects */
-            --shu-color: #2ecc71; 
-            --wu-color: #e74c3c;  
-            --wei-color: #3498db; 
             
             /* Font Variables */
             --font-art: 'Ma Shan Zheng', cursive;
             --font-text: "BiauKai", "KaiTi", "標楷體", "Microsoft JhengHei", serif;
             --font-eng: "Arial", sans-serif;
+
+            /* FIX: 定義勢力顏色變數，讓選擇勢力時的發光效果生效 */
+            --shu-color: #2ecc71;
+            --wu-color: #e74c3c;
+            --wei-color: #3498db;
         }
 
         body {
@@ -36,7 +37,7 @@
         .hidden { display: none !important; }
 
         /* =========================================
-           SCENE: INTRO SCREEN
+           SCENE 1: INTRO SCREEN (Shared Container)
            ========================================= */
         #intro-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -47,77 +48,12 @@
         }
 
         .tap-hint {
-            position: absolute; bottom: 20px; font-size: 0.9rem; opacity: 0.5; color: #fff;
+            position: absolute; bottom: 20px; font-size: 0.9rem; opacity: 0.5; color: inherit;
             animation: pulse 2s infinite; font-family: var(--font-text);
         }
         @keyframes pulse { 0% { opacity: 0.3; } 50% { opacity: 0.8; } 100% { opacity: 0.3; } }
 
-        /* Battlefield Silhouettes */
-        .battlefield-bg {
-            position: absolute; bottom: 0; left: 0; width: 100%; height: 40%;
-            background-repeat: repeat-x; background-position: bottom; background-size: auto 100%;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 300' preserveAspectRatio='none'%3E%3Cpath d='M0,300 L0,200 Q100,150 200,220 Q300,280 400,200 T600,220 T800,180 T1000,240 L1200,200 L1200,300 Z' fill='%23000' opacity='0.6'/%3E%3Cpath d='M0,300 L0,250 Q150,200 300,270 T600,240 T900,260 L1200,230 L1200,300 Z' fill='%23000' opacity='0.8'/%3E%3Cg fill='%23000'%3E%3Crect x='50' y='180' width='2' height='100'/%3E%3Cpath d='M50,180 L80,190 L50,210 Z'/%3E%3Crect x='250' y='200' width='2' height='100' transform='rotate(10 250 300)'/%3E%3Cpath d='M250,200 L280,210 L250,230 Z' transform='rotate(10 250 300)'/%3E%3Crect x='850' y='160' width='3' height='140'/%3E%3Cpath d='M850,160 L900,180 L850,220 Z'/%3E%3C/g%3E%3C/svg%3E");
-            opacity: 0.8; pointer-events: none;
-        }
-
-        /* Embers */
-        .ember {
-            position: absolute; bottom: -10px; width: 4px; height: 4px; border-radius: 50%;
-            background: #ff4500;
-            box-shadow: 0 0 10px #ff4500, 0 0 20px #ffff00;
-            animation: rise 4s linear infinite; pointer-events: none;
-        }
-        @keyframes rise { 0% {bottom: -10px; opacity: 1;} 100% {bottom: 100%; opacity: 0; transform: translateX(50px);} }
-
-        /* Intro Text */
-        .intro-text-container { position: relative; z-index: 10; text-align: center; padding: 20px; animation: fadeIn 2s ease-out; }
-        @keyframes fadeIn { from {opacity: 0; transform: scale(0.9);} to {opacity: 1; transform: scale(1);} }
-
-        .intro-sub { font-family: var(--font-art); font-size: 2.5rem; color: #d4af37; text-shadow: 2px 2px 4px #000; margin-bottom: 10px; letter-spacing: 5px; }
-        .intro-main {
-            font-family: var(--font-art); font-size: 5rem;
-            background-image: linear-gradient(to bottom, #ff0000 30%, #800000 100%);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            text-shadow: 0px 0px 20px rgba(255, 0, 0, 0.5);
-            margin: 0; line-height: 1.2; letter-spacing: 10px; position: relative;
-        }
-        .intro-main::after {
-            content: attr(data-text); position: absolute; left: 0; top: 0; width: 100%; height: 100%;
-            background-image: linear-gradient(to bottom, transparent 40%, #500 90%);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            opacity: 0.5; filter: blur(1px); z-index: -1;
-        }
-
-        .start-btn {
-            margin-top: 50px; font-family: var(--font-art); font-size: 2.5rem;
-            padding: 15px 60px; background: transparent; color: #d4af37;
-            border: 3px solid #d4af37; border-radius: 5px; cursor: pointer;
-            text-shadow: 0 0 10px #d4af37; box-shadow: 0 0 20px rgba(212, 175, 55, 0.2), inset 0 0 20px rgba(0,0,0,0.5);
-            transition: all 0.3s; position: relative; overflow: hidden; z-index: 10;
-        }
-        .start-btn:hover { background: rgba(212, 175, 55, 0.1); transform: scale(1.05); box-shadow: 0 0 40px rgba(212, 175, 55, 0.6), inset 0 0 30px rgba(0,0,0,0.8); color: #fff; border-color: #fff; }
-        .start-btn::before {
-            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.2), transparent 60%);
-            transform: rotate(45deg); animation: shine 3s infinite linear; pointer-events: none;
-        }
-        @keyframes shine { 0% {transform: rotate(45deg) translateY(-100%);} 100% {transform: rotate(45deg) translateY(100%);} }
-
-        .ost-btn {
-            margin-top: 20px; font-family: var(--font-text); font-size: 1.2rem;
-            padding: 8px 30px; background: transparent; color: #aaa;
-            border: 1px solid #555; border-radius: 30px; cursor: pointer;
-            transition: all 0.3s; z-index: 10; letter-spacing: 2px;
-        }
-        .ost-btn:hover { color: #d4af37; border-color: #d4af37; background: rgba(212, 175, 55, 0.1); }
-        .ost-eng { font-family: var(--font-eng); font-weight: bold; }
-
-
-        /* =========================================
-           THEME MODES
-           ========================================= */
-        
-        /* 1. WAR (Pure Dark) */
+        /* --- MODE A: WAR (Initial - Dark Theme) --- */
         body.theme-war {
             background-color: #1a0505;
             background-image: 
@@ -125,8 +61,41 @@
                 url("data:image/svg+xml,%3Csvg width='800' height='600' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.1'/%3E%3C/svg%3E");
             color: #fff;
         }
+        
+        body.theme-war #intro-screen .battlefield-bg { opacity: 0.8; display: block; }
+        
+        body.theme-war .intro-sub { color: #d4af37; text-shadow: 2px 2px 4px #000; }
+        
+        body.theme-war .intro-main {
+            background-image: linear-gradient(to bottom, #ff0000 30%, #800000 100%);
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0px 0px 20px rgba(255, 0, 0, 0.5);
+        }
+        body.theme-war .intro-main::after {
+            content: attr(data-text); position: absolute; left: 0; top: 0; width: 100%; height: 100%;
+            background-image: linear-gradient(to bottom, transparent 40%, #500 90%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            opacity: 0.5; filter: blur(1px); z-index: -1; display: block;
+        }
 
-        /* 2. PEACE (Game & Return) - Light BG with Fish */
+        body.theme-war .start-btn {
+            color: #d4af37; border: 3px solid #d4af37;
+            text-shadow: 0 0 10px #d4af37; 
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.2);
+            background: transparent;
+        }
+        body.theme-war .start-btn:hover { background: rgba(212, 175, 55, 0.1); color: #fff; border-color: #fff; }
+        
+        body.theme-war .ost-btn { color: #aaa; border: 1px solid #555; background: transparent; }
+        body.theme-war .ost-btn:hover { color: #d4af37; border-color: #d4af37; }
+
+        body.theme-war .ember {
+            background: #ff4500;
+            box-shadow: 0 0 10px #ff4500, 0 0 20px #ffff00;
+        }
+
+        /* --- MODE B: PEACE (Return - Light Theme) --- */
         body.theme-peace {
             background-color: #f0f0f0;
             background-image: 
@@ -137,10 +106,107 @@
             color: #333;
         }
 
-        /* --- THE MAGIC TRICK: Mix War UI with Peace BG on Return --- */
+        /* Peace Mode Overrides - USE !important to ensure visibility */
         body.theme-peace #intro-screen {
-            background-color: rgba(20, 5, 5, 0.6); 
+            background: rgba(255,255,255,0.05); /* Almost transparent to show Koi */
         }
+        
+        /* 1. KEEP Battlefield Silhouette (Restore visibility) */
+        body.theme-peace .battlefield-bg { 
+            display: block !important; 
+            opacity: 0.8 !important; /* Keep war vibe */
+        }
+
+        /* 2. Text Visibility Fixes (Dark Text on Light BG) */
+        body.theme-peace .intro-sub { 
+            color: #3e2723 !important; 
+            text-shadow: 0 0 5px rgba(255,255,255,0.8) !important; 
+            font-weight: bold;
+        }
+        
+        body.theme-peace .intro-main { 
+            background: none !important;
+            -webkit-text-fill-color: #8b0000 !important; /* Deep Red Solid */
+            color: #8b0000 !important;
+            text-shadow: 2px 2px 0px rgba(255,255,255,0.8), 0 0 15px rgba(0,0,0,0.1) !important;
+        }
+        body.theme-peace .intro-main::after { display: none !important; }
+
+        body.theme-peace .start-btn { 
+            color: #8b0000 !important; 
+            border: 3px solid #8b0000 !important; 
+            text-shadow: none !important; 
+            background: rgba(255,255,255,0.5) !important;
+            box-shadow: 0 5px 15px rgba(139,0,0,0.2) !important;
+        }
+        body.theme-peace .start-btn:hover {
+            background: #8b0000 !important; 
+            color: #fff !important;
+            transform: scale(1.05);
+        }
+
+        body.theme-peace .ost-btn { 
+            color: #b71c1c !important; 
+            border: 2px solid #b71c1c !important;
+            background: rgba(255,255,255,0.5) !important;
+            font-weight: bold;
+        }
+        body.theme-peace .ost-btn:hover {
+            background: #b71c1c !important; 
+            color: #fff !important;
+        }
+        
+        body.theme-peace .tap-hint { color: #555 !important; }
+
+        /* 3. KEEP War Embers (Orange/Red) - Do not change to green */
+        body.theme-peace .ember {
+            background: #ff4500 !important;
+            box-shadow: 0 0 10px #ff4500, 0 0 20px #ffff00 !important;
+            width: 4px !important; height: 4px !important;
+            opacity: 1 !important;
+            border: none !important;
+        }
+
+
+        /* --- COMMON ANIMATIONS --- */
+        .battlefield-bg {
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 40%;
+            background-repeat: repeat-x; background-position: bottom; background-size: auto 100%;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 300' preserveAspectRatio='none'%3E%3Cpath d='M0,300 L0,200 Q100,150 200,220 Q300,280 400,200 T600,220 T800,180 T1000,240 L1200,200 L1200,300 Z' fill='%23000' opacity='0.6'/%3E%3Cpath d='M0,300 L0,250 Q150,200 300,270 T600,240 T900,260 L1200,230 L1200,300 Z' fill='%23000' opacity='0.8'/%3E%3Cg fill='%23000'%3E%3Crect x='50' y='180' width='2' height='100'/%3E%3Cpath d='M50,180 L80,190 L50,210 Z'/%3E%3Crect x='250' y='200' width='2' height='100' transform='rotate(10 250 300)'/%3E%3Cpath d='M250,200 L280,210 L250,230 Z' transform='rotate(10 250 300)'/%3E%3Crect x='850' y='160' width='3' height='140'/%3E%3Cpath d='M850,160 L900,180 L850,220 Z'/%3E%3C/g%3E%3C/svg%3E");
+            transition: opacity 1.5s;
+        }
+
+        .ember {
+            position: absolute; bottom: -10px; width: 4px; height: 4px; border-radius: 50%;
+            animation: rise 4s linear infinite; pointer-events: none;
+            transition: background 1.5s, box-shadow 1.5s, width 1s, height 1s;
+        }
+        @keyframes rise { 0% {bottom: -10px; opacity: 1;} 100% {bottom: 100%; opacity: 0; transform: translateX(50px);} }
+
+        .intro-text-container { position: relative; z-index: 10; text-align: center; padding: 20px; animation: fadeIn 2s ease-out; }
+        @keyframes fadeIn { from {opacity: 0; transform: scale(0.9);} to {opacity: 1; transform: scale(1);} }
+
+        .intro-sub { font-family: var(--font-art); font-size: 2.5rem; margin-bottom: 10px; letter-spacing: 5px; transition: color 1s; }
+        .intro-main { font-family: var(--font-art); font-size: 5rem; margin: 0; line-height: 1.2; letter-spacing: 10px; position: relative; transition: all 1s; }
+
+        .start-btn {
+            margin-top: 50px; font-family: var(--font-art); font-size: 2.5rem;
+            padding: 15px 60px; border-radius: 5px; cursor: pointer;
+            transition: all 0.5s; position: relative; overflow: hidden; z-index: 10;
+        }
+        .start-btn::before {
+            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.2), transparent 60%);
+            transform: rotate(45deg); animation: shine 3s infinite linear; pointer-events: none;
+        }
+        @keyframes shine { 0% {transform: rotate(45deg) translateY(-100%);} 100% {transform: rotate(45deg) translateY(100%);} }
+
+        .ost-btn {
+            margin-top: 20px; font-family: var(--font-text); font-size: 1.2rem;
+            padding: 8px 30px; border-radius: 30px; cursor: pointer;
+            transition: all 0.5s; z-index: 10; letter-spacing: 2px;
+        }
+        .ost-eng { font-family: var(--font-eng); font-weight: bold; }
 
         /* --- Koi Fish Layers --- */
         #fish-layer {
@@ -280,6 +346,25 @@
         #mode-overlay h2, #ost-overlay h2 { font-family: var(--font-art); color: #ff4500; text-shadow: 0 0 10px rgba(255, 69, 0, 0.5); font-size: 2.2rem; }
         #mode-overlay label { color: #d4af37; font-family: var(--font-text); }
         #mode-overlay select { background: #333; color: #fff; border: 1px solid #555; font-family: var(--font-text); }
+        
+        /* Updated Menu Buttons (Military Order) */
+        #menu-overlay .menu-btn {
+            background: linear-gradient(to bottom, #2c3e50, #1a252f);
+            border: 2px solid #d4af37; /* Gold border */
+            color: #d4af37; /* Gold text */
+            font-family: var(--font-text); font-size: 1.3rem; font-weight: bold;
+            margin: 10px 0; width: 100%; padding: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.4);
+            letter-spacing: 1px;
+            border-radius: 4px;
+        }
+        #menu-overlay .menu-btn:hover {
+            background: linear-gradient(to bottom, #34495e, #2c3e50);
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
+            color: #fff; border-color: #fff;
+        }
+        
+        /* War Mode Menu Buttons */
         #mode-overlay .menu-btn, #ost-overlay .menu-btn {
             background: linear-gradient(to bottom, #800000, #500000);
             border: 1px solid #ff4500; color: #fff;
@@ -302,7 +387,7 @@
         }
         .faction-btn h4 { font-size: 1.8rem; margin: 0; text-shadow: 1px 1px 2px rgba(0,0,0,0.8); }
 
-        /* Specific Faction Styles & Neon Glow */
+        /* Specific Faction Styles */
         .btn-shu { background: linear-gradient(135deg, #145a32, #2ecc71); border-color: #117a65; }
         .btn-wu { background: linear-gradient(135deg, #641e16, #e74c3c); border-color: #922b21; }
         .btn-wei { background: linear-gradient(135deg, #154360, #3498db); border-color: #1f618d; }
@@ -456,14 +541,14 @@
         </div>
     </div>
 
-    <!-- 4. In-Game Menu -->
+    <!-- 4. In-Game Menu (Styled) -->
     <div id="menu-overlay" class="overlay hidden">
         <div class="modal">
             <h3>軍令狀</h3>
-            <button class="menu-btn" onclick="handleMenuOption('draw')">平分秋色 (平局)</button>
-            <button class="menu-btn" onclick="handleMenuOption('restart')">卷土重来 (再戰)</button>
-            <button class="menu-btn" onclick="handleMenuOption('quit')">後會有期 (退兵)</button>
-            <button class="header-btn" onclick="closeInGameMenu()" style="margin-top:10px;">返回戰場</button>
+            <button class="menu-btn" onclick="handleMenuOption('draw')">握手言和 </button>
+            <button class="menu-btn" onclick="handleMenuOption('restart')">卷土重来 </button>
+            <button class="menu-btn" onclick="handleMenuOption('quit')">解甲歸田 </button>
+            <button class="header-btn" onclick="closeInGameMenu()" style="margin-top:15px; width: 100%;">返回戰場</button>
         </div>
     </div>
 
@@ -507,14 +592,14 @@ const CONTROL_WEIGHTS = [
     [1, 1, 2, 3, 4, 3, 2, 1, 1]
 ];
 
-/* --- CONFIG: MUSIC PLAYLISTS --- */
+/* --- CONFIG: MUSIC PLAYLISTS (Fully Populated) --- */
 const BGM_PLAYLIST = {
     WAR: [ 
         "https://raw.githubusercontent.com/wjy1976/sango-chess/main/1.Prelude%20Gathering%20Storms.mp3",
-        "https://raw.githubusercontent.com/wjy1976/sango-chess/main/2.War%20Prep%20Iron-Clad%20Orders.mp3" 
+        "https://raw.githubusercontent.com/wjy1976/sango-chess/main/3.Farewell%20The%20Heroes%E2%80%99%20Last%20Departure.mp3" 
     ],
     MENU: [
-        "https://raw.githubusercontent.com/wjy1976/sango-chess/main/3.Farewell%20The%20Heroes%E2%80%99%20Last%20Departure.mp3",
+        "https://raw.githubusercontent.com/wjy1976/sango-chess/main/2.War%20Prep%20Iron-Clad%20Orders.mp3",
         "https://raw.githubusercontent.com/wjy1976/sango-chess/main/4.March%20Lightning%20Strike%20Assault.mp3" 
     ],
     GAME: [
@@ -834,6 +919,12 @@ function backToIntro() {
     const intro = document.getElementById('intro-screen');
     intro.classList.remove('hidden');
     
+    // --- FIX START: Ensure Game UI is hidden ---
+    document.getElementById('game-header').classList.remove('visible');
+    document.getElementById('board-container').classList.remove('visible');
+    document.getElementById('game-log').classList.remove('visible');
+    // --- FIX END ---
+    
     // Reset to "WAR" theme for the intro
     document.body.classList.remove('theme-peace');
     document.body.classList.add('theme-war');
@@ -862,6 +953,7 @@ function returnToPeaceIntro() {
     
     intro.style.opacity = '1'; // Force visible
     
+    // Music: Switch to Peace/End ambient
     SoundManager.switchTheme('PEACE'); 
 }
 
@@ -916,7 +1008,7 @@ function closeOST() {
     }
     
     // Decide theme based on class
-    if (document.getElementById('intro-screen').classList.contains('peace-mode')) {
+    if (document.body.classList.contains('theme-peace')) {
          SoundManager.switchTheme('PEACE');
     } else {
          SoundManager.switchTheme('WAR');
@@ -1390,91 +1482,655 @@ function checkWin() {
     return false;
 }
 
-function aiMove() {
-    const p = getCurrentPlayer(); if (!p) return; 
-    const diff = gameState.setup.difficulty; 
-    let actions = []; let myIndices = [], unknownIndices = [];
-    gameState.board.forEach((pc, i) => {
-        if (!pc) return;
-        if (!pc.revealed) unknownIndices.push(i);
-        else if (p.army && pc.group === p.army) myIndices.push(i);
-    });
+/* ============================
+   終極暗棋AI - 簡單但強大版
+   ============================ */
 
+// 簡單版AI思考引擎
+function smartAIMove() {
+    const p = getCurrentPlayer();
+    if (!p) return;
+    
+    // 1. 首先檢查緊急情況：棋子正在被攻擊
+    const emergencyAction = findEmergencyMove(p.id);
+    if (emergencyAction) { executeEmergencyAction(emergencyAction); return; }
+    
+    // 2. 檢查是否能吃掉對手棋子
+    const captureAction = findBestCapture(p.id);
+    if (captureAction) { executeCapture(captureAction); return; }
+    
+    // 3. 如果有棋子沒有軍隊，優先翻棋 (高優先級)
+    if (!p.army) {
+        const flipAction = findBestFlip(p.id);
+        if (flipAction) { executeFlip(flipAction.idx); return; }
+    }
+    
+    // 4. 移動到有利位置
+    const moveAction = findStrategicMove(p.id);
+    if (moveAction) { executeMove(moveAction.from, moveAction.to); return; }
+    
+    // 5. [新增] 如果有軍隊但沒好步數，嘗試翻棋 (而非放棄)
     if (p.army) {
-        myIndices.forEach(from => {
-            const moves = calculateMoves(from);
-            moves.forEach(to => {
-                const target = gameState.board[to];
-                let score = 0;
-                if (diff === 'LV1') { score = Math.random() * 10; if (target) score += 5; } 
-                else if (diff === 'LV2') { score = Math.random() * 10; if (target) score += 5; }
-                else {
-                    if (target) score = TYPES[target.type].val; else { score = 2; if (to % 9 === 4 || Math.floor(to / 9) === 2) score += 3; }
-                    
-                    // SMART LOGIC (LV4/LV5)
-                    if (diff === 'LV4' || diff === 'LV5') {
-                        const movingPiece = gameState.board[from]; const originalTo = gameState.board[to]; const myVal = TYPES[movingPiece.type].val;
-                        
-                        try {
-                            // MOCK MOVE
-                            gameState.board[to] = movingPiece; 
-                            gameState.board[from] = null;
-                            
-                            let threatScore = 0;
-                            
-                            // Check Safety: Scan all enemies
-                            for (let i = 0; i < TOTAL_CELLS; i++) {
-                                const enemy = gameState.board[i];
-                                if (enemy && enemy.revealed && enemy.group !== p.army) {
-                                    // Can this enemy kill me at 'to'?
-                                    // Pass current board state to check hypothetical moves
-                                    const enemyMoves = calculateMoves(i, gameState.board, enemy.group);
-                                    if (enemyMoves.includes(to)) {
-                                        threatScore += myVal; 
-                                        if (diff === 'LV5' && myVal >= 50) threatScore += 30; // Protect big pieces
-                                        break; 
-                                    }
-                                }
-                            }
-                            
-                            score -= threatScore; // Subtract risk
-                            
-                            // Hunter Logic: Kill high value targets
-                            if (diff === 'LV5' && target && (target.type === 'KING' || target.type === 'ROOK')) score += 40;
-                            
-                        } finally { 
-                            // RESTORE BOARD
-                            gameState.board[from] = movingPiece; 
-                            gameState.board[to] = originalTo; 
-                        }
-                    }
+         const flipAction = findBestFlip(p.id);
+         // 只要翻棋分數不是太差（> -20 表示不是自殺行為），就嘗試翻棋
+         if (flipAction && flipAction.score > -20) { 
+             executeFlip(flipAction.idx); 
+             return; 
+         }
+    }
+    
+    // 6. 如果以上都沒有，隨機行動 (作為最後防線)
+    makeRandomMove(p.id);
+}
+
+/* ============================
+   1. 緊急情況處理
+   ============================ */
+function findEmergencyMove(playerIdx) {
+    const player = gameState.players[playerIdx];
+    if (!player.army) return null;
+    
+    // 找出所有正在被威脅的棋子
+    const threatenedPieces = [];
+    
+    for (let i = 0; i < TOTAL_CELLS; i++) {
+        const piece = gameState.board[i];
+        if (piece && piece.revealed && piece.group === player.army) {
+            // 檢查這個棋子是否被威脅
+            const threats = countThreatsToPiece(i);
+            if (threats > 0) {
+                threatenedPieces.push({
+                    idx: i,
+                    threats: threats,
+                    piece: piece
+                });
+            }
+        }
+    }
+    
+    // 按威脅程度排序（威脅多的優先處理）
+    threatenedPieces.sort((a, b) => b.threats - a.threats);
+    
+    // 處理每個被威脅的棋子
+    for (const tp of threatenedPieces) {
+        // 嘗試逃跑
+        const escapeMoves = calculateMoves(tp.idx, gameState.board, player.army);
+        
+        // 找出最安全的逃跑位置
+        let bestEscape = null;
+        let bestSafety = -Infinity;
+        
+        for (const targetIdx of escapeMoves) {
+            const targetPiece = gameState.board[targetIdx];
+            
+            // 模擬移動到這個位置
+            const simulatedBoard = simulateMove(gameState.board, tp.idx, targetIdx);
+            const threatsAfter = countThreatsToPiece(targetIdx, simulatedBoard, player.army);
+            
+            // 安全性 = 減少威脅 + 可能吃子
+            let safetyScore = (tp.threats - threatsAfter) * 100;
+            
+            if (targetPiece && targetPiece.revealed && targetPiece.group !== player.army) {
+                // 逃跑同時吃子，非常好！
+                safetyScore += 300;
+            } else if (!targetPiece) {
+                // 移動到空位，位置安全性評估
+                safetyScore += evaluatePositionSafety(targetIdx, simulatedBoard, player.army);
+            }
+            
+            if (safetyScore > bestSafety) {
+                bestSafety = safetyScore;
+                bestEscape = {
+                    from: tp.idx,
+                    to: targetIdx,
+                    score: safetyScore
+                };
+            }
+        }
+        
+        if (bestEscape && bestSafety > 50) {
+            return { type: 'MOVE', ...bestEscape, reason: '緊急逃跑' };
+        }
+    }
+    
+    return null;
+}
+
+/* ============================
+   2. 找最好的吃子機會
+   ============================ */
+function findBestCapture(playerIdx) {
+    const player = gameState.players[playerIdx];
+    if (!player.army) return null;
+    
+    const captureMoves = [];
+    
+    // 找出所有可以吃子的移動
+    for (let i = 0; i < TOTAL_CELLS; i++) {
+        const piece = gameState.board[i];
+        if (piece && piece.revealed && piece.group === player.army) {
+            const moves = calculateMoves(i, gameState.board, player.army);
+            
+            for (const targetIdx of moves) {
+                const targetPiece = gameState.board[targetIdx];
+                if (targetPiece && targetPiece.revealed && targetPiece.group !== player.army) {
+                    // 這是一個吃子機會
+                    const captureScore = evaluateCapture(i, targetIdx, playerIdx);
+                    captureMoves.push({
+                        from: i,
+                        to: targetIdx,
+                        score: captureScore,
+                        targetPlayer: getPlayerByArmy(targetPiece.group)
+                    });
                 }
-                actions.push({ type: 'MOVE', from, to, score });
+            }
+        }
+    }
+    
+    if (captureMoves.length === 0) return null;
+    
+    // 排序：先按分數，再按戰略考慮
+    captureMoves.sort((a, b) => {
+        // 首先按分數排序
+        if (b.score !== a.score) return b.score - a.score;
+        
+        // 分數相同時，考慮三人遊戲策略
+        const aStrategic = evaluateStrategicCapture(a);
+        const bStrategic = evaluateStrategicCapture(b);
+        return bStrategic - aStrategic;
+    });
+    
+    return { type: 'MOVE', ...captureMoves[0], reason: '吃子' };
+}
+
+function evaluateCapture(fromIdx, toIdx, playerIdx) {
+    let score = 200; // 基礎吃子分數
+    
+    const player = gameState.players[playerIdx];
+    const targetPiece = gameState.board[toIdx];
+    
+    // 1. 吃子後的安全性檢查
+    const simulatedBoard = simulateMove(gameState.board, fromIdx, toIdx);
+    const threatsAfter = countThreatsToPiece(toIdx, simulatedBoard, player.army);
+    score -= threatsAfter * 50; // 每個威脅減50分
+    
+    // 2. 是否會引發連鎖反應（吃掉後我的棋子可以繼續吃）
+    const movesAfter = calculateMoves(toIdx, simulatedBoard, player.army);
+    const followUpCaptures = movesAfter.filter(idx => {
+        const piece = simulatedBoard[idx];
+        return piece && piece.revealed && piece.group !== player.army;
+    });
+    score += followUpCaptures.length * 100;
+    
+    // 3. 位置價值
+    const positionValue = getPositionValue(toIdx);
+    score += positionValue;
+    
+    // 4. 目標玩家的棋子數量
+    const targetPlayer = getPlayerByArmy(targetPiece.group);
+    if (targetPlayer) {
+        const targetPieceCount = countPlayerPieces(targetPlayer.id, gameState.board);
+        if (targetPieceCount <= 3) {
+            // 對手棋子很少，這個吃子可能消滅他
+            score += 150;
+        }
+    }
+    
+    return score;
+}
+
+function evaluateStrategicCapture(captureMove) {
+    if (!captureMove.targetPlayer) return 0;
+    
+    const targetPlayer = captureMove.targetPlayer;
+    let strategicScore = 0;
+    
+    // 計算所有玩家的棋子數
+    const playerCounts = gameState.players.map(p => ({
+        player: p,
+        count: countPlayerPieces(p.id, gameState.board)
+    }));
+    
+    // 找到最強的對手和最弱的對手
+    const alivePlayers = playerCounts.filter(pc => pc.count > 0 && pc.player.army);
+    if (alivePlayers.length < 3) return 0;
+    
+    const strongest = [...alivePlayers].sort((a, b) => b.count - a.count)[0];
+    const weakest = [...alivePlayers].sort((a, b) => a.count - b.count)[0];
+    
+    // 策略1: 攻擊最強的對手（平衡遊戲）
+    if (targetPlayer.id === strongest.player.id) {
+        strategicScore += 80;
+    }
+    
+    // 策略2: 不攻擊最弱的對手（讓他存活，分散注意力）
+    if (targetPlayer.id === weakest.player.id) {
+        strategicScore -= 60;
+    }
+    
+    // 策略3: 如果我有最多的棋子，保守一點
+    const currentPlayer = getCurrentPlayer();
+    const myCount = countPlayerPieces(currentPlayer.id, gameState.board);
+    if (myCount > strongest.count) {
+        // 我是最強的，減少攻擊性
+        strategicScore -= 40;
+    }
+    
+    return strategicScore;
+}
+
+/* ============================
+   3. 找最好的翻棋位置
+   ============================ */
+function findBestFlip(playerIdx) {
+    const player = gameState.players[playerIdx];
+    const unknownCells = [];
+    
+    // 收集所有未翻開的棋子
+    for (let i = 0; i < TOTAL_CELLS; i++) {
+        const piece = gameState.board[i];
+        if (piece && !piece.revealed) {
+            unknownCells.push({
+                idx: i,
+                score: evaluateFlipPosition(i, player)
             });
-        });
+        }
+    }
+    
+    if (unknownCells.length === 0) return null;
+    
+    // 按分數排序
+    unknownCells.sort((a, b) => b.score - a.score);
+    return unknownCells[0];
+}
+
+function evaluateFlipPosition(cellIdx, player) {
+    let score = 0;
+    
+    // 1. 位置價值（中心最好）
+    score += getPositionValue(cellIdx) * 3;
+    
+    // 2. 如果沒有軍隊，任何翻棋都很好
+    if (!player.army) {
+        score += 500;
+        return score;
+    }
+    
+    // 3. 鄰居分析
+    const neighbors = getNeighbors(cellIdx);
+    let friendlyNeighbors = 0;
+    let emptyNeighbors = 0;
+    
+    for (const neighborIdx of neighbors) {
+        const neighbor = gameState.board[neighborIdx];
+        if (!neighbor) {
+            emptyNeighbors++;
+        } else if (neighbor.revealed) {
+            if (neighbor.group === player.army) {
+                friendlyNeighbors++;
+            } else {
+                // 有敵人在旁邊，翻棋可能被立即吃掉
+                score -= 30;
+            }
+        }
+    }
+    
+    // 4. 安全度：有友軍在旁邊更好
+    score += friendlyNeighbors * 40;
+    score += emptyNeighbors * 10;
+    
+    return score;
+}
+
+/* ============================
+   4. 找戰略性移動
+   ============================ */
+function findStrategicMove(playerIdx) {
+    const player = gameState.players[playerIdx];
+    if (!player.army) return null;
+    
+    const strategicMoves = [];
+    
+    // 找出所有可能的移動
+    for (let i = 0; i < TOTAL_CELLS; i++) {
+        const piece = gameState.board[i];
+        if (piece && piece.revealed && piece.group === player.army) {
+            const moves = calculateMoves(i, gameState.board, player.army);
+            
+            for (const targetIdx of moves) {
+                const targetPiece = gameState.board[targetIdx];
+                // 只考慮移動到空位（吃子已經在前面考慮過了）
+                if (!targetPiece) {
+                    const moveScore = evaluateStrategicMove(i, targetIdx, playerIdx);
+                    strategicMoves.push({
+                        from: i,
+                        to: targetIdx,
+                        score: moveScore
+                    });
+                }
+            }
+        }
+    }
+    
+    if (strategicMoves.length === 0) return null;
+    
+    // 選擇最好的戰略移動
+    strategicMoves.sort((a, b) => b.score - a.score);
+    const bestMove = strategicMoves[0];
+    
+    // 只執行有正面價值的移動
+    return bestMove.score > 0 ? bestMove : null;
+}
+
+function evaluateStrategicMove(fromIdx, toIdx, playerIdx) {
+    let score = 0;
+    const player = gameState.players[playerIdx];
+    
+    // 1. 移動到更好的位置
+    const fromValue = getPositionValue(fromIdx);
+    const toValue = getPositionValue(toIdx);
+    score += (toValue - fromValue) * 20;
+    
+    // 2. 安全性變化
+    const threatsBefore = countThreatsToPiece(fromIdx);
+    const simulatedBoard = simulateMove(gameState.board, fromIdx, toIdx);
+    const threatsAfter = countThreatsToPiece(toIdx, simulatedBoard, player.army);
+    score += (threatsBefore - threatsAfter) * 60;
+    
+    // 3. 移動後的新攻擊機會
+    const newAttacks = countAttackOpportunities(toIdx, playerIdx, simulatedBoard);
+    score += newAttacks * 40;
+    
+    // 4. 控制區域
+    const controlBefore = countControlledCells(fromIdx, player.army);
+    const controlAfter = countControlledCells(toIdx, player.army, simulatedBoard);
+    score += (controlAfter - controlBefore) * 15;
+    
+    // 5. 移動到中心區域特別好
+    if (isCenterPosition(toIdx)) {
+        score += 50;
+    }
+    
+    return score;
+}
+
+/* ============================
+   5. 隨機移動（最後手段）- 已修復無法行動Bug
+   ============================ */
+function makeRandomMove(playerIdx) {
+    const player = gameState.players[playerIdx];
+    
+    // 1. 收集所有可能的翻棋點
+    const unknownCells = [];
+    for (let i = 0; i < TOTAL_CELLS; i++) {
+        if (gameState.board[i] && !gameState.board[i].revealed) {
+            unknownCells.push(i);
+        }
     }
 
-    unknownIndices.forEach(idx => {
-        let score = 0;
-        if (diff === 'LV1') score = Math.random() * 20;
-        else {
-            if (!p.army) score = 999;
-            else { score = 15; if (diff === 'LV4' || diff === 'LV5') score = 8; }
+    // 2. 收集所有可能的移動步數
+    const myPiecesMoves = [];
+    if (player.army) {
+        for (let i = 0; i < TOTAL_CELLS; i++) {
+            const piece = gameState.board[i];
+            if (piece && piece.revealed && piece.group === player.army) {
+                const moves = calculateMoves(i, gameState.board, player.army);
+                if (moves.length > 0) {
+                    myPiecesMoves.push({ idx: i, moves: moves });
+                }
+            }
         }
-        actions.push({ type: 'FLIP', idx, score });
-    });
+    }
 
-    if (actions.length === 0) { log(`${p.name} 無法行動`); finishTurn(); return; }
+    // 3. 判斷可用行動
+    const canFlip = unknownCells.length > 0;
+    const canMove = myPiecesMoves.length > 0;
+
+    // 如果真的無路可走且無牌可翻，才跳過回合
+    if (!canFlip && !canMove) {
+        log(`${player.name} 無法行動`);
+        finishTurn();
+        return;
+    }
+
+    // 4. 決策邏輯
+    let performFlip = false;
+
+    if (!canMove) {
+        // 沒步數走，強制翻棋
+        performFlip = true;
+    } else if (!canFlip) {
+        // 沒棋可翻，強制移動
+        performFlip = false;
+    } else {
+        // 兩者皆可，根據機率決定 (30% 翻棋，70% 移動)
+        // 注意：如果還沒選兵種 (!player.army)，通常會優先翻棋
+        if (!player.army) performFlip = true; 
+        else performFlip = Math.random() < 0.3; 
+    }
+
+    // 5. 執行
+    if (performFlip) {
+        const randomIdx = unknownCells[Math.floor(Math.random() * unknownCells.length)];
+        executeFlip(randomIdx);
+    } else {
+        const randomPiece = myPiecesMoves[Math.floor(Math.random() * myPiecesMoves.length)];
+        const randomMove = randomPiece.moves[Math.floor(Math.random() * randomPiece.moves.length)];
+        executeMove(randomPiece.idx, randomMove);
+    }
+}
+
+/* ============================
+   輔助函數
+   ============================ */
+function countThreatsToPiece(cellIdx, boardState = gameState.board, myArmy = null) {
+    if (!myArmy) {
+        const player = getCurrentPlayer();
+        myArmy = player ? player.army : null;
+    }
+    if (!myArmy) return 0;
     
-    // Add noise for variability
-    actions.forEach(a => {
-        const noise = (diff === 'LV1') ? (Math.random()*50 - 25) : (Math.random()*5 - 2.5);
-        a.finalScore = a.score + noise;
-    });
+    let threats = 0;
+    for (let i = 0; i < TOTAL_CELLS; i++) {
+        const piece = boardState[i];
+        if (piece && piece.revealed && piece.group !== myArmy) {
+            const moves = calculateMoves(i, boardState, piece.group);
+            if (moves.includes(cellIdx)) {
+                threats++;
+            }
+        }
+    }
+    return threats;
+}
+
+function simulateMove(boardState, fromIdx, toIdx) {
+    const newBoard = boardState.map(p => p ? {...p} : null);
+    newBoard[toIdx] = newBoard[fromIdx];
+    newBoard[fromIdx] = null;
+    return newBoard;
+}
+
+function getPositionValue(cellIdx) {
+    const x = cellIdx % BOARD_W;
+    const y = Math.floor(cellIdx / BOARD_W);
     
-    actions.sort((a,b) => b.finalScore - a.finalScore);
-    const act = actions[0];
-    if (act.type === 'FLIP') executeFlip(act.idx); else executeMove(act.from, act.to);
+    // 中心位置最有價值
+    if (x === 4 && y === 2) return 10; // 正中心
+    if (x >= 3 && x <= 5 && y >= 1 && y <= 3) return 8; // 中心區域
+    if (x >= 2 && x <= 6 && y >= 0 && y <= 4) return 5; // 中環
+    return 2; // 邊緣
+}
+
+function isCenterPosition(cellIdx) {
+    const x = cellIdx % BOARD_W;
+    const y = Math.floor(cellIdx / BOARD_W);
+    return (x >= 3 && x <= 5 && y >= 1 && y <= 3);
+}
+
+function getNeighbors(cellIdx) {
+    const x = cellIdx % BOARD_W;
+    const y = Math.floor(cellIdx / BOARD_W);
+    const neighbors = [];
+    
+    if (x > 0) neighbors.push(cellIdx - 1);
+    if (x < BOARD_W - 1) neighbors.push(cellIdx + 1);
+    if (y > 0) neighbors.push(cellIdx - BOARD_W);
+    if (y < BOARD_H - 1) neighbors.push(cellIdx + BOARD_W);
+    
+    return neighbors;
+}
+
+function countPlayerPieces(playerIdx, boardState = gameState.board) {
+    const player = gameState.players[playerIdx];
+    if (!player.army) return 0;
+    
+    let count = 0;
+    for (const piece of boardState) {
+        if (piece && piece.revealed && piece.group === player.army) {
+            count++;
+        }
+    }
+    return count;
+}
+
+function getPlayerByArmy(army) {
+    return gameState.players.find(p => p.army === army);
+}
+
+function evaluatePositionSafety(cellIdx, boardState, myArmy) {
+    let safety = 100;
+    
+    // 檢查每個方向是否有敵人可以攻擊這個位置
+    const directions = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+    
+    for (const [dx, dy] of directions) {
+        let x = cellIdx % BOARD_W + dx;
+        let y = Math.floor(cellIdx / BOARD_W) + dy;
+        
+        while (x >= 0 && x < BOARD_W && y >= 0 && y < BOARD_H) {
+            const idx = y * BOARD_W + x;
+            const piece = boardState[idx];
+            
+            if (piece) {
+                if (piece.revealed && piece.group !== myArmy) {
+                    // 有敵人，檢查是否能攻擊
+                    const moves = calculateMoves(idx, boardState, piece.group);
+                    if (moves.includes(cellIdx)) {
+                        safety -= 25; // 被這個敵人威脅
+                    }
+                }
+                break; // 遇到棋子就停止這個方向的檢查
+            }
+            
+            x += dx;
+            y += dy;
+        }
+    }
+    
+    return Math.max(0, safety);
+}
+
+function countAttackOpportunities(fromIdx, playerIdx, boardState) {
+    const player = gameState.players[playerIdx];
+    if (!player.army) return 0;
+    
+    const moves = calculateMoves(fromIdx, boardState, player.army);
+    let attackCount = 0;
+    
+    for (const moveIdx of moves) {
+        const target = boardState[moveIdx];
+        if (target && target.revealed && target.group !== player.army) {
+            // 檢查這個攻擊是否安全
+            const simulated = simulateMove(boardState, fromIdx, moveIdx);
+            const threats = countThreatsToPiece(moveIdx, simulated, player.army);
+            if (threats === 0) {
+                attackCount++;
+            }
+        }
+    }
+    
+    return attackCount;
+}
+
+function countControlledCells(fromIdx, myArmy, boardState = gameState.board) {
+    const moves = calculateMoves(fromIdx, boardState, myArmy);
+    let control = moves.length;
+    
+    // 每個移動位置再加權
+    for (const moveIdx of moves) {
+        const target = boardState[moveIdx];
+        if (!target) {
+            // 空位，完全控制
+            control += 1;
+        } else if (target.revealed && target.group !== myArmy) {
+            // 可以吃子，強力控制
+            control += 3;
+        }
+    }
+    
+    return control;
+}
+
+/* ============================
+   執行函數
+   ============================ */
+function executeEmergencyAction(action) {
+    log(`${getCurrentPlayer().name} 緊急行動：${action.reason}`);
+    if (action.type === 'MOVE') {
+        executeMove(action.from, action.to);
+    }
+}
+
+function executeCapture(action) {
+    const player = getCurrentPlayer();
+    const targetPiece = gameState.board[action.to];
+    const targetPlayer = getPlayerByArmy(targetPiece.group);
+    
+    log(`${player.name} 發動攻擊！${action.reason} ${targetPlayer ? `(目標: ${targetPlayer.name})` : ''}`);
+    executeMove(action.from, action.to);
+}
+
+/* ============================
+   替換原有的aiMove函數
+   ============================ */
+// 將原有的aiMove函數完全替換為：
+function aiMove() {
+    // 根據難度調整AI行為
+    const difficulty = gameState.setup.difficulty;
+    
+    switch(difficulty) {
+        case 'LV1': // 入門：很笨，隨機性高
+            setTimeout(() => makeRandomMove(getCurrentPlayer().id), 500);
+            break;
+            
+        case 'LV2': // 初級：會基本策略
+            setTimeout(() => {
+                if (Math.random() < 0.4) makeRandomMove(getCurrentPlayer().id);
+                else smartAIMove();
+            }, 600);
+            break;
+            
+        case 'LV3': // 中級：不錯的策略
+            setTimeout(() => smartAIMove(), 700);
+            break;
+            
+        case 'LV4': // 高級：聰明策略
+            setTimeout(() => {
+                // 高級AI有時會多思考一下
+                setTimeout(() => smartAIMove(), 300);
+            }, 500);
+            break;
+            
+        case 'LV5': // 修羅：非常聰明
+            setTimeout(() => {
+                // 修羅AI會"思考"更久，模仿人類思考時間
+                setTimeout(() => smartAIMove(), 800 + Math.random() * 700);
+            }, 500);
+            break;
+            
+        default:
+            setTimeout(() => smartAIMove(), 500);
+    }
 }
 
 function getPieceName(p) { return p.color==='r' ? TYPES[p.type].nameR : TYPES[p.type].nameB; }
@@ -1483,4 +2139,4 @@ function endGame(msg) { gameState.gameOver = true; document.getElementById('winn
 function log(msg) { const el = document.getElementById('game-log'); const d = document.createElement('div'); d.className = 'log-line'; d.innerText = msg; el.prepend(d); }
 </script>
 </body>
-</html
+</html>
